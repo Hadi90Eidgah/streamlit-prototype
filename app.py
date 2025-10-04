@@ -6,6 +6,7 @@ import networkx as nx
 import json
 from collections import defaultdict, deque
 
+
 # Page configuration
 st.set_page_config(
     page_title="Research Grant to Treatment Lineage",
