@@ -1,0 +1,643 @@
+{
+  "treatment": "Givinostat",
+  "nodes": [
+    {
+      "pubmed_id": "FT2020-001",
+      "title": "Fondazione Telethon Research Grant",
+      "authors": "Telethon Foundation",
+      "journal": "Internal Grant Record",
+      "doi": null,
+      "year": 2020,
+      "funding_source": "Fondazione Telethon",
+      "layer": 5
+    },
+    {
+      "pubmed_id": "95822412",
+      "title": "Investigating Givinostat efficacy in preclinical models (Layer 4)",
+      "authors": "Michelle Garrett, Sheryl Robinson, Thomas Chung",
+      "journal": "Nature Medicine",
+      "doi": "10.1000/95822412",
+      "year": 2018,
+      "funding_source": "Fondazione Telethon",
+      "layer": 4
+    },
+    {
+      "pubmed_id": "46913810",
+      "title": "Mechanistic insights into Givinostat-induced muscle regeneration (Layer 4)",
+      "authors": "John Scott, Marissa Palmer, Patricia Reyes",
+      "journal": "The Lancet Neurology",
+      "doi": "10.1000/46913810",
+      "year": 2019,
+      "funding_source": "Fondazione Telethon",
+      "layer": 4
+    },
+    {
+      "pubmed_id": "28728463",
+      "title": "Investigating Givinostat efficacy in preclinical models (Layer 4)",
+      "authors": "Jeffrey Grant, Joshua Perry MD, Eddie Gonzalez",
+      "journal": "Cell",
+      "doi": "10.1000/28728463",
+      "year": 2020,
+      "funding_source": "Fondazione Telethon",
+      "layer": 4
+    },
+    {
+      "pubmed_id": "66629388",
+      "title": "Investigating Givinostat efficacy in preclinical models (Layer 3)",
+      "authors": "Christopher Walter, Karen Davis",
+      "journal": "Cell",
+      "doi": "10.1000/66629388",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "41227216",
+      "title": "Longitudinal outcomes of Givinostat-treated patients (Layer 3)",
+      "authors": "Henry Alexander, Dr. Cassidy Schwartz MD",
+      "journal": "The Lancet Neurology",
+      "doi": "10.1000/41227216",
+      "year": 2018,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "39587039",
+      "title": "Gene expression modulation by Givinostat (Layer 3)",
+      "authors": "Jeff Williams, Chris Faulkner, Robert Nelson, Ashley Logan",
+      "journal": "Nature Medicine",
+      "doi": "10.1000/39587039",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "66722344",
+      "title": "Clinical evaluation of Givinostat in Duchenne Muscular Dystrophy (Layer 3)",
+      "authors": "Ana Turner, Lisa Gross, Julie Cole, Corey Johnson",
+      "journal": "Science Translational Medicine",
+      "doi": "10.1000/66722344",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "55176955",
+      "title": "Investigating Givinostat efficacy in preclinical models (Layer 3)",
+      "authors": "Kara Caldwell, Becky Palmer",
+      "journal": "PLoS ONE",
+      "doi": "10.1000/55176955",
+      "year": 2015,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "58181396",
+      "title": "Clinical evaluation of Givinostat in Duchenne Muscular Dystrophy (Layer 3)",
+      "authors": "Adrienne Espinoza, Jessica Evans, Lisa Potter, Dr. Richard Campos",
+      "journal": "Nature Medicine",
+      "doi": "10.1000/58181396",
+      "year": 2018,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "26753883",
+      "title": "Gene expression modulation by Givinostat (Layer 3)",
+      "authors": "Caitlyn Dunlap, Melissa Chandler",
+      "journal": "Journal of Clinical Investigation",
+      "doi": "10.1000/26753883",
+      "year": 2017,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "87490893",
+      "title": "Mechanistic insights into Givinostat-induced muscle regeneration (Layer 3)",
+      "authors": "Eric Chan, Charles Thomas",
+      "journal": "Nature Medicine",
+      "doi": "10.1000/87490893",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "48840994",
+      "title": "Investigating Givinostat efficacy in preclinical models (Layer 3)",
+      "authors": "Joseph Miller, Zachary Taylor, Krista Fox",
+      "journal": "Cell",
+      "doi": "10.1000/48840994",
+      "year": 2018,
+      "funding_source": null,
+      "layer": 3
+    },
+    {
+      "pubmed_id": "70855700",
+      "title": "Clinical evaluation of Givinostat in Duchenne Muscular Dystrophy (Layer 2)",
+      "authors": "Tyler Matthews, Dana King",
+      "journal": "Frontiers in Neuroscience",
+      "doi": "10.1000/70855700",
+      "year": 2014,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "38119557",
+      "title": "Clinical evaluation of Givinostat in Duchenne Muscular Dystrophy (Layer 2)",
+      "authors": "Kevin English, Nicholas Moreno, Jonathon Perez, Jasmin Allen",
+      "journal": "Cell",
+      "doi": "10.1000/38119557",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "81691040",
+      "title": "Mechanistic insights into Givinostat-induced muscle regeneration (Layer 2)",
+      "authors": "Anthony Fry, Christopher Reyes",
+      "journal": "Molecular Therapy",
+      "doi": "10.1000/81691040",
+      "year": 2015,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "95899313",
+      "title": "Longitudinal outcomes of Givinostat-treated patients (Layer 2)",
+      "authors": "Sherry Case, Jonathan Castillo",
+      "journal": "Frontiers in Neuroscience",
+      "doi": "10.1000/95899313",
+      "year": 2012,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "40742311",
+      "title": "Investigating Givinostat efficacy in preclinical models (Layer 2)",
+      "authors": "Veronica Wright, Daniel Taylor, Timothy Thomas",
+      "journal": "PLoS ONE",
+      "doi": "10.1000/40742311",
+      "year": 2014,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "38317637",
+      "title": "Longitudinal outcomes of Givinostat-treated patients (Layer 2)",
+      "authors": "John Reed, James Walker, Tina Campbell, Matthew Vargas",
+      "journal": "Frontiers in Neuroscience",
+      "doi": "10.1000/38317637",
+      "year": 2013,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "63100814",
+      "title": "Gene expression modulation by Givinostat (Layer 2)",
+      "authors": "Joseph Davies, Danielle Gonzalez",
+      "journal": "Journal of Clinical Investigation",
+      "doi": "10.1000/63100814",
+      "year": 2013,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "43101783",
+      "title": "Longitudinal outcomes of Givinostat-treated patients (Layer 2)",
+      "authors": "Sheryl Cooper, Melody Tucker, Mary Walls, Albert Reyes",
+      "journal": "Journal of Clinical Investigation",
+      "doi": "10.1000/43101783",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "88320463",
+      "title": "Gene expression modulation by Givinostat (Layer 2)",
+      "authors": "James Young, Meredith Lopez, Jonathan Martinez",
+      "journal": "The Lancet Neurology",
+      "doi": "10.1000/88320463",
+      "year": 2013,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "78387461",
+      "title": "Gene expression modulation by Givinostat (Layer 2)",
+      "authors": "Megan Ryan, Joseph Molina",
+      "journal": "Nature Medicine",
+      "doi": "10.1000/78387461",
+      "year": 2012,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "94214382",
+      "title": "Mechanistic insights into Givinostat-induced muscle regeneration (Layer 2)",
+      "authors": "Jordan Coleman, Charles Hayes, Christine Smith, John Adams",
+      "journal": "PLoS ONE",
+      "doi": "10.1000/94214382",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "61642594",
+      "title": "Gene expression modulation by Givinostat (Layer 2)",
+      "authors": "Jeremy Tate, Thomas Clark, Chloe Kelley, David Carter",
+      "journal": "Molecular Therapy",
+      "doi": "10.1000/61642594",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "84252722",
+      "title": "Investigating Givinostat efficacy in preclinical models (Layer 2)",
+      "authors": "Kevin Snyder, Shannon Williamson, Joseph Bennett, Rachel Nelson",
+      "journal": "Cell",
+      "doi": "10.1000/84252722",
+      "year": 2016,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "45812670",
+      "title": "Clinical evaluation of Givinostat in Duchenne Muscular Dystrophy (Layer 2)",
+      "authors": "Carolyn Compton, Charlene Reynolds",
+      "journal": "Journal of Clinical Investigation",
+      "doi": "10.1000/45812670",
+      "year": 2015,
+      "funding_source": null,
+      "layer": 2
+    },
+    {
+      "pubmed_id": "31227574",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Pamela Ray, Michelle Webb, Alyssa Mendoza, Jeffrey Blair",
+      "journal": "Molecular Therapy",
+      "doi": "10.1000/31227574",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "10435578",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Alyssa Hines, Justin Oconnor, Robert Sullivan, Samantha Smith",
+      "journal": "Journal of Clinical Investigation",
+      "doi": "10.1000/10435578",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "77187530",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Dylan Moran, Jacob Rodriguez, Gregory Stone, Hannah Reid",
+      "journal": "Science Translational Medicine",
+      "doi": "10.1000/77187530",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "78139880",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Laura Potts, Matthew Church, Caitlyn Kirk, David Ware",
+      "journal": "Cell",
+      "doi": "10.1000/78139880",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "93926371",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Lauren Davis, Ashley Le, Christina George, Carol Wise",
+      "journal": "Journal of Clinical Investigation",
+      "doi": "10.1000/93926371",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "95758349",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Anne Petty, Arthur Oneill, Natalie Delgado, Mary Thomas",
+      "journal": "The Lancet Neurology",
+      "doi": "10.1000/95758349",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "30513739",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Jeffrey Moore, Whitney Jenkins, Diane David, Corey Weeks",
+      "journal": "Frontiers in Neuroscience",
+      "doi": "10.1000/30513739",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "31682744",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Katherine Mendoza, Leslie Perez, Todd Rose, Troy Williams",
+      "journal": "Nature Medicine",
+      "doi": "10.1000/31682744",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "90388981",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Steven Bowers, Kimberly Walker, Christopher Rich, Paul Smith",
+      "journal": "Frontiers in Neuroscience",
+      "doi": "10.1000/90388981",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "75579548",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Daniel Peterson, Richard Clark, Vanessa Taylor, Sherry Smith",
+      "journal": "Nature Medicine",
+      "doi": "10.1000/75579548",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "25014631",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Stephen Mooney MD, Sarah Mcclure, Erin Newman, Mrs. Tasha Garcia",
+      "journal": "Frontiers in Neuroscience",
+      "doi": "10.1000/25014631",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "51273847",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Beverly Scott, Joseph Gibson, Dale Burgess, Philip Maldonado",
+      "journal": "The Lancet Neurology",
+      "doi": "10.1000/51273847",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "17774584",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Bill Robertson, Andrea Jenkins, Timothy Jimenez, Austin Williams",
+      "journal": "The Lancet Neurology",
+      "doi": "10.1000/17774584",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "86149359",
+      "title": "Approval study of Givinostat (Layer 1)",
+      "authors": "Steven King, Kevin Johnson, Brian Lawson, Antonio Stone",
+      "journal": "Cell",
+      "doi": "10.1000/86149359",
+      "year": 2023,
+      "funding_source": null,
+      "layer": 1
+    },
+    {
+      "pubmed_id": "GIVINOSTAT",
+      "title": "Givinostat FDA/EMA Approval",
+      "authors": "Regulatory Submission",
+      "journal": "FDA/EMA Database",
+      "doi": null,
+      "year": 2024,
+      "funding_source": null,
+      "layer": 0
+    }
+  ],
+  "edges": [
+    {
+      "source": "FT2020-001",
+      "target": "95822412"
+    },
+    {
+      "source": "FT2020-001",
+      "target": "46913810"
+    },
+    {
+      "source": "FT2020-001",
+      "target": "28728463"
+    },
+    {
+      "source": "95822412",
+      "target": "66629388"
+    },
+    {
+      "source": "95822412",
+      "target": "41227216"
+    },
+    {
+      "source": "95822412",
+      "target": "39587039"
+    },
+    {
+      "source": "46913810",
+      "target": "66722344"
+    },
+    {
+      "source": "46913810",
+      "target": "55176955"
+    },
+    {
+      "source": "46913810",
+      "target": "58181396"
+    },
+    {
+      "source": "28728463",
+      "target": "26753883"
+    },
+    {
+      "source": "28728463",
+      "target": "87490893"
+    },
+    {
+      "source": "28728463",
+      "target": "48840994"
+    },
+    {
+      "source": "66629388",
+      "target": "70855700"
+    },
+    {
+      "source": "66629388",
+      "target": "38119557"
+    },
+    {
+      "source": "41227216",
+      "target": "81691040"
+    },
+    {
+      "source": "39587039",
+      "target": "95899313"
+    },
+    {
+      "source": "39587039",
+      "target": "40742311"
+    },
+    {
+      "source": "66722344",
+      "target": "38317637"
+    },
+    {
+      "source": "55176955",
+      "target": "63100814"
+    },
+    {
+      "source": "55176955",
+      "target": "43101783"
+    },
+    {
+      "source": "58181396",
+      "target": "88320463"
+    },
+    {
+      "source": "58181396",
+      "target": "78387461"
+    },
+    {
+      "source": "26753883",
+      "target": "94214382"
+    },
+    {
+      "source": "87490893",
+      "target": "61642594"
+    },
+    {
+      "source": "48840994",
+      "target": "84252722"
+    },
+    {
+      "source": "48840994",
+      "target": "45812670"
+    },
+    {
+      "source": "70855700",
+      "target": "31227574"
+    },
+    {
+      "source": "38119557",
+      "target": "10435578"
+    },
+    {
+      "source": "81691040",
+      "target": "77187530"
+    },
+    {
+      "source": "95899313",
+      "target": "78139880"
+    },
+    {
+      "source": "40742311",
+      "target": "93926371"
+    },
+    {
+      "source": "38317637",
+      "target": "95758349"
+    },
+    {
+      "source": "63100814",
+      "target": "30513739"
+    },
+    {
+      "source": "43101783",
+      "target": "31682744"
+    },
+    {
+      "source": "88320463",
+      "target": "90388981"
+    },
+    {
+      "source": "78387461",
+      "target": "75579548"
+    },
+    {
+      "source": "94214382",
+      "target": "25014631"
+    },
+    {
+      "source": "61642594",
+      "target": "51273847"
+    },
+    {
+      "source": "84252722",
+      "target": "17774584"
+    },
+    {
+      "source": "45812670",
+      "target": "86149359"
+    },
+    {
+      "source": "31227574",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "10435578",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "77187530",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "78139880",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "93926371",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "95758349",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "30513739",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "31682744",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "90388981",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "75579548",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "25014631",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "51273847",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "17774584",
+      "target": "GIVINOSTAT"
+    },
+    {
+      "source": "86149359",
+      "target": "GIVINOSTAT"
+    }
+  ]
+}
