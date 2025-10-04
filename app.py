@@ -79,10 +79,35 @@ def classify_nodes(nodes_df, edges_df):
         if edge['edge_type'] == 'led_to_approval':
             approval_papers.add(edge['source_id'])
     
-    # Find papers that cite FT-funded papers
-    for _, edge in edges_df.iterrows():
-        if edge['edge_type'] == 'cites' and edge['target_id'] in ft_funded_papers:
-            citing_ft_papers.add(edge['source_id'])
+    # Find papers that cite FT-funded papers (directly or indirectly)
+    def find_papers_citing_ft(ft_papers, edges_df):
+        citing_papers = set()
+        
+        # Direct citations
+        for _, edge in edges_df.iterrows():
+            if edge['edge_type'] == 'cites' and edge['target_id'] in ft_papers:
+                citing_papers.add(edge['source_id'])
+        
+        # Indirect citations (papers that cite papers that cite FT papers)
+        # This creates a broader network of FT influence
+        previous_size = 0
+        while len(citing_papers) > previous_size:
+            previous_size = len(citing_papers)
+            new_citing_papers = set()
+            
+            for _, edge in edges_df.iterrows():
+                if edge['edge_type'] == 'cites' and edge['target_id'] in citing_papers:
+                    new_citing_papers.add(edge['source_id'])
+            
+            citing_papers.update(new_citing_papers)
+            
+            # Prevent infinite loop
+            if len(citing_papers) > 100:  # Safety limit
+                break
+        
+        return citing_papers
+    
+    citing_ft_papers = find_papers_citing_ft(ft_funded_papers, edges_df)
     
     return ft_funded_papers, citing_ft_papers, approval_papers, treatment_nodes
 
@@ -94,7 +119,7 @@ def get_node_color(node_id, node_type, ft_funded, citing_ft, approval, treatment
         'citing_paper': '#ff7f0e',  # Orange
         'approval_paper': '#2ca02c',  # Green
         'treatment': '#2ca02c',  # Green
-        'other_paper': '#d3d3d3'  # Light grey
+        'other_paper': '#808080'  # Darker grey (was #d3d3d3)
     }
     
     # Determine base color category
@@ -117,8 +142,8 @@ def get_node_color(node_id, node_type, ft_funded, citing_ft, approval, treatment
     if distance >= 0 and color_key in ['citing_paper', 'other_paper']:
         # Make nodes closer to approval more intense
         max_distance = 5  # Assume max distance for normalization
-        intensity = 1 - (distance / max_distance) * 0.5  # 0.5 to 1.0 range
-        intensity = max(0.5, min(1.0, intensity))
+        intensity = 1 - (distance / max_distance) * 0.3  # 0.7 to 1.0 range
+        intensity = max(0.7, min(1.0, intensity))
         
         # Convert hex to RGB and apply intensity
         hex_color = base_color.lstrip('#')
@@ -185,15 +210,15 @@ def create_hierarchical_layout(nodes_df, edges_df):
     
     # Position nodes
     for node, level in levels.items():
-        x = level * 2  # Horizontal spacing between levels
+        x = level * 2.5  # Increased horizontal spacing
         
         # Vertical spacing within level
         total_in_level = level_counts[level]
         if total_in_level == 1:
             y = 0
         else:
-            y_spacing = 3.0 / max(1, total_in_level - 1)
-            y = -1.5 + level_positions[level] * y_spacing
+            y_spacing = 4.0 / max(1, total_in_level - 1)  # Increased vertical spacing
+            y = -2.0 + level_positions[level] * y_spacing
         
         pos[node] = (x, y)
         level_positions[level] += 1
@@ -205,7 +230,7 @@ def create_hierarchical_layout(nodes_df, edges_df):
     
     return pos
 
-def create_network_graph(nodes_df, edges_df):
+def create_network_graph(nodes_df, edges_df, show_edges=True):
     """Create an interactive network graph using Plotly"""
     # Create NetworkX graph for layout
     G = nx.DiGraph()
@@ -224,12 +249,34 @@ def create_network_graph(nodes_df, edges_df):
     # Classify nodes
     ft_funded, citing_ft, approval, treatment = classify_nodes(nodes_df, edges_df)
     
+    # Prepare edge traces (only if show_edges is True)
+    edge_traces = []
+    if show_edges:
+        edge_x = []
+        edge_y = []
+        
+        for edge in G.edges():
+            x0, y0 = pos[edge[0]]
+            x1, y1 = pos[edge[1]]
+            edge_x.extend([x0, x1, None])
+            edge_y.extend([y0, y1, None])
+        
+        # Create edge trace with better styling
+        edge_trace = go.Scatter(
+            x=edge_x, y=edge_y,
+            line=dict(width=1, color='#cccccc'),  # Lighter, thinner edges
+            hoverinfo='none',
+            mode='lines',
+            opacity=0.5,
+            showlegend=False
+        )
+        edge_traces.append(edge_trace)
+    
     # Prepare node traces
     node_x = []
     node_y = []
     node_colors = []
     node_sizes = []
-    node_text = []
     node_hover = []
     
     for node_id in G.nodes():
@@ -247,78 +294,71 @@ def create_network_graph(nodes_df, edges_df):
         
         # Determine size based on node type
         if node_data['node_type'] == 'grant':
-            size = 25
-        elif node_data['node_type'] == 'treatment':
             size = 30
+        elif node_data['node_type'] == 'treatment':
+            size = 35
         elif node_id in approval:
+            size = 25
+        elif node_id in ft_funded:
             size = 20
         else:
             size = 15
         node_sizes.append(size)
         
-        # Node labels
-        if node_data['node_type'] == 'grant':
-            label = 'FT Grant'
-        elif node_data['node_type'] == 'treatment':
-            label = details.get('approval_agency', 'Treatment')
-        else:
-            label = node_id[:8] + '...'
-        node_text.append(label)
-        
-        # Hover information
+        # Hover information (detailed)
         hover_info = f"<b>{node_data['node_label']}</b><br>"
-        hover_info += f"Type: {node_data['node_type']}<br>"
-        if 'title' in details:
-            hover_info += f"Title: {details['title'][:50]}...<br>"
-        if 'authors' in details:
-            hover_info += f"Authors: {details['authors']}<br>"
-        if 'year' in details:
-            hover_info += f"Year: {details['year']}<br>"
-        if distance >= 0:
-            hover_info += f"Distance to Approval: {distance}<br>"
+        hover_info += f"<b>Type:</b> {node_data['node_type'].replace('_', ' ').title()}<br>"
+        
+        if node_data['node_type'] == 'grant':
+            hover_info += f"<b>Agency:</b> {details.get('agency', 'N/A')}<br>"
+            hover_info += f"<b>Year:</b> {details.get('year', 'N/A')}<br>"
+        elif node_data['node_type'] == 'treatment':
+            hover_info += f"<b>Approval Agency:</b> {details.get('approval_agency', 'N/A')}<br>"
+            hover_info += f"<b>Approval Year:</b> {details.get('approval_year', 'N/A')}<br>"
+        else:
+            if 'title' in details:
+                title = details['title']
+                if len(title) > 60:
+                    title = title[:60] + "..."
+                hover_info += f"<b>Title:</b> {title}<br>"
+            if 'authors' in details:
+                hover_info += f"<b>Authors:</b> {details['authors']}<br>"
+            if 'year' in details:
+                hover_info += f"<b>Year:</b> {details['year']}<br>"
+            if 'journal' in details:
+                journal = details['journal']
+                if len(journal) > 40:
+                    journal = journal[:40] + "..."
+                hover_info += f"<b>Journal:</b> {journal}<br>"
+            if distance >= 0:
+                hover_info += f"<b>Distance to Approval:</b> {distance}<br>"
+            if 'ft_grant' in details:
+                hover_info += f"<b>Funded by:</b> Fondazione Telethon<br>"
+        
         node_hover.append(hover_info)
     
-    # Prepare edge traces
-    edge_x = []
-    edge_y = []
-    
-    for edge in G.edges():
-        x0, y0 = pos[edge[0]]
-        x1, y1 = pos[edge[1]]
-        edge_x.extend([x0, x1, None])
-        edge_y.extend([y0, y1, None])
-    
-    # Create edge trace with better styling
-    edge_trace = go.Scatter(
-        x=edge_x, y=edge_y,
-        line=dict(width=2, color='#666'),
-        hoverinfo='none',
-        mode='lines',
-        opacity=0.7
-    )
-    
-    # Create node trace
+    # Create node trace (no text labels by default)
     node_trace = go.Scatter(
         x=node_x, y=node_y,
-        mode='markers+text',
+        mode='markers',  # Removed text mode
         hoverinfo='text',
-        text=node_text,
-        textposition="middle center",
-        textfont=dict(size=10, color='white'),
         hovertext=node_hover,
         marker=dict(
             size=node_sizes,
             color=node_colors,
-            line=dict(width=2, color='white')
-        )
+            line=dict(width=2, color='white'),
+            opacity=0.9
+        ),
+        showlegend=False
     )
     
     # Create figure
-    fig = go.Figure(data=[edge_trace, node_trace])
+    data = edge_traces + [node_trace] if show_edges else [node_trace]
+    fig = go.Figure(data=data)
     
-    # Update layout separately to avoid compatibility issues
+    # Update layout
     fig.update_layout(
-        title='Research Grant to Treatment Lineage - Hierarchical Flow',
+        title='Research Grant to Treatment Lineage - Clean View',
         title_font_size=18,
         showlegend=False,
         hovermode='closest',
@@ -347,12 +387,17 @@ def create_summary_table(nodes_df, edges_df):
         if node['node_type'] == 'paper':
             details = parse_node_details(node['details'])
             if 'ft_grant' in details:
+                # Count how many times this paper is cited
+                citation_count = len([e for _, e in edges_df.iterrows() 
+                                    if e['edge_type'] == 'cites' and e['target_id'] == node['node_id']])
+                
                 ft_papers.append({
                     'Paper ID': node['node_id'],
                     'Title': details.get('title', 'N/A'),
                     'Authors': details.get('authors', 'N/A'),
                     'Year': details.get('year', 'N/A'),
                     'Journal': details.get('journal', 'N/A'),
+                    'Citations': citation_count,
                     'Distance to Approval': details.get('node_distance_to_approval', 'N/A')
                 })
     
@@ -365,8 +410,15 @@ def main():
     # Load data
     nodes_df, edges_df = load_data()
     
-    # Sidebar with information
+    # Sidebar with controls and information
     with st.sidebar:
+        st.header("🎛️ Controls")
+        
+        # Toggle for showing edges
+        show_edges = st.checkbox("Show Citation Edges", value=False, 
+                                help="Toggle to show/hide the citation connections between papers")
+        
+        st.markdown("---")
         st.header("📊 Dataset Overview")
         
         total_nodes = len(nodes_df)
@@ -381,9 +433,9 @@ def main():
         st.header("🎨 Color Legend")
         st.markdown("""
         - 🔵 **Blue**: FT Grant & Funded Papers
-        - 🟠 **Orange**: Papers citing FT research
+        - 🟠 **Orange**: Papers citing FT research (direct/indirect)
         - 🟢 **Green**: Approval Paper & Treatment
-        - ⚪ **Grey**: Other Publications
+        - ⚫ **Dark Grey**: Other Publications
         
         *Color intensity indicates distance to final approval*
         """)
@@ -391,11 +443,14 @@ def main():
         st.markdown("---")
         st.header("ℹ️ About")
         st.markdown("""
-        This visualization shows the path from a Fondazione Telethon research grant 
+        This visualization shows the realistic path from a Fondazione Telethon research grant 
         through scientific publications to the final approved treatment (Givinostat).
         
-        The graph demonstrates how initial research funding can lead to breakthrough 
-        treatments through a network of scientific citations and collaborations.
+        **Key Features:**
+        - Realistic citation patterns (not all FT papers are cited immediately)
+        - Some FT papers may remain uncited
+        - Cross-temporal citations (papers citing FT work years later)
+        - Clean view with hover-only details
         """)
     
     # Main content
@@ -405,8 +460,8 @@ def main():
         st.subheader("📈 Citation Network Visualization")
         
         # Create and display the network graph
-        fig = create_network_graph(nodes_df, edges_df)
-        st.plotly_chart(fig, use_container_width=True, height=600)
+        fig = create_network_graph(nodes_df, edges_df, show_edges=show_edges)
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.subheader("📋 Quick Stats")
@@ -418,6 +473,20 @@ def main():
         st.metric("Papers Citing FT Research", len(citing_ft))
         st.metric("Approval Papers", len(approval))
         st.metric("Final Treatments", len(treatment))
+        
+        # Calculate citation statistics
+        ft_paper_ids = [node['node_id'] for _, node in nodes_df.iterrows() 
+                       if node['node_type'] == 'paper' and 'ft_grant' in parse_node_details(node['details'])]
+        
+        cited_ft_papers = set()
+        for _, edge in edges_df.iterrows():
+            if edge['edge_type'] == 'cites' and edge['target_id'] in ft_paper_ids:
+                cited_ft_papers.add(edge['target_id'])
+        
+        uncited_ft_papers = len(ft_paper_ids) - len(cited_ft_papers)
+        
+        st.metric("Cited FT Papers", len(cited_ft_papers))
+        st.metric("Uncited FT Papers", uncited_ft_papers)
         
         # Show treatment details
         treatment_node = nodes_df[nodes_df['node_type'] == 'treatment'].iloc[0]
@@ -435,6 +504,18 @@ def main():
     ft_table = create_summary_table(nodes_df, edges_df)
     if not ft_table.empty:
         st.dataframe(ft_table, use_container_width=True)
+        
+        # Additional insights
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            avg_citations = ft_table['Citations'].mean()
+            st.metric("Avg Citations per FT Paper", f"{avg_citations:.1f}")
+        with col2:
+            most_cited = ft_table['Citations'].max()
+            st.metric("Most Cited FT Paper", f"{most_cited} citations")
+        with col3:
+            uncited_count = len(ft_table[ft_table['Citations'] == 0])
+            st.metric("Uncited FT Papers", uncited_count)
     else:
         st.info("No FT-funded publications found in the dataset.")
     
@@ -443,7 +524,7 @@ def main():
     st.markdown("""
     <div style='text-align: center; color: #888; font-size: 0.9rem;'>
         <p>Exploring the Path from Research Grants to FDA and EMA Approved Treatments</p>
-        <p>A Collaborative Approach to Understanding Research Impact</p>
+        <p>A Realistic Model of Research Impact and Citation Patterns</p>
     </div>
     """, unsafe_allow_html=True)
 
