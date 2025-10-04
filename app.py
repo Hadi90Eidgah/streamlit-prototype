@@ -1,5 +1,5 @@
 """
-Research Impact Dashboard - Selection-First Layout (SYNTAX FIXED)
+Research Impact Dashboard - Selection-First Layout (CLEAN VERSION)
 Users choose a grant or treatment, then see the citation network
 Perfect for stakeholder presentations and fundraising demonstrations
 """
@@ -77,14 +77,14 @@ def load_database():
             summary_df = pd.read_csv('streamlit_summary.csv')
             return nodes_df, edges_df, summary_df
     except Exception as e:
-        st.error(f"Error loading data: {e}")
+        st.error("Error loading data: " + str(e))
         return create_sample_data()
 
 def create_sample_data():
     """Create sample data if files are not available"""
     summary_df = pd.DataFrame({
         'network_id': [1, 2, 3],
-        'disease': ['Cancer', 'Alzheimer\'s Disease', 'Diabetes'],
+        'disease': ['Cancer', 'Alzheimer Disease', 'Diabetes'],
         'treatment_name': ['CAR-T Cell Therapy', 'Aducanumab Plus', 'Smart Insulin Patch'],
         'grant_id': ['INST-R01-877572', 'INST-U01-352422', 'INST-U01-448787'],
         'grant_year': [2015, 2019, 2015],
@@ -209,16 +209,17 @@ def create_citation_network(nodes_df, edges_df, selected_network_id):
                         
                         # Create hover text
                         if node_type == 'grant':
-                            text = f"Grant: {node.get('grant_id', node['node_id'])}<br>"
-                            text += f"Funding: ${node.get('funding_amount', 0):,.0f}<br>"
-                            text += f"Year: {node.get('year', 'N/A')}"
+                            text = "Grant: " + str(node.get('grant_id', node['node_id']))
+                            text += "<br>Funding: $" + str(node.get('funding_amount', 0))
+                            text += "<br>Year: " + str(node.get('year', 'N/A'))
                         elif node_type == 'treatment':
-                            text = f"Treatment: {node.get('treatment_name', node['node_id'])}<br>"
-                            text += f"Approval: {node.get('approval_year', 'N/A')}"
+                            text = "Treatment: " + str(node.get('treatment_name', node['node_id']))
+                            text += "<br>Approval: " + str(node.get('approval_year', 'N/A'))
                         else:  # publication
-                            text = f"Publication: {node.get('pmid', node['node_id'])}<br>"
-                            text += f"Title: {str(node.get('title', 'N/A'))[:50]}...<br>"
-                            text += f"Year: {node.get('year', 'N/A')}"
+                            text = "Publication: " + str(node.get('pmid', node['node_id']))
+                            title_text = str(node.get('title', 'N/A'))[:50] + "..."
+                            text += "<br>Title: " + title_text
+                            text += "<br>Year: " + str(node.get('year', 'N/A'))
                         
                         node_text.append(text)
                 
@@ -233,16 +234,18 @@ def create_citation_network(nodes_df, edges_df, selected_network_id):
                             color=node_colors[node_type],
                             line=dict(width=2, color='white')
                         ),
-                        name=f"{node_type.title()}s",
+                        name=node_type.title() + "s",
                         showlegend=True
                     )
                     node_traces.append(node_trace)
         
         # Create figure
+        title_text = "Citation Network - " + str(len(network_nodes)) + " nodes, " + str(len(network_edges)) + " connections"
+        
         fig = go.Figure(data=edge_traces + node_traces)
         
         fig.update_layout(
-            title=f"Citation Network - {len(network_nodes)} nodes, {len(network_edges)} connections",
+            title=title_text,
             titlefont_size=16,
             showlegend=True,
             hovermode='closest',
@@ -261,7 +264,7 @@ def create_citation_network(nodes_df, edges_df, selected_network_id):
         return fig
     
     except Exception as e:
-        st.error(f"Error creating citation network: {e}")
+        st.error("Error creating citation network: " + str(e))
         return go.Figure()
 
 def create_hierarchical_layout(G, nodes_df):
@@ -316,7 +319,8 @@ def main():
         
         grant_options = {}
         for _, row in summary_df.iterrows():
-            grant_options[f"{row['grant_id']} - {row['disease']}"] = row['network_id']
+            option_text = str(row['grant_id']) + " - " + str(row['disease'])
+            grant_options[option_text] = row['network_id']
         
         selected_grant = st.selectbox(
             "Choose a research grant:",
@@ -328,15 +332,15 @@ def main():
             selected_network_from_grant = grant_options[selected_grant]
             grant_info = summary_df[summary_df['network_id'] == selected_network_from_grant].iloc[0]
             
-            grant_card_html = f"""
-            <div class="selection-card grant-card">
-                <h4>📋 {grant_info['grant_id']}</h4>
-                <p><strong>Disease Focus:</strong> {grant_info['disease']}</p>
-                <p><strong>Funding:</strong> ${grant_info['funding_amount']:,.0f}</p>
-                <p><strong>Year:</strong> {grant_info['grant_year']}</p>
-                <p class="metric-highlight">Duration: {grant_info['research_duration']} years</p>
-            </div>
-            """
+            # Create grant card HTML safely
+            grant_card_html = '<div class="selection-card grant-card">'
+            grant_card_html += '<h4>📋 ' + str(grant_info['grant_id']) + '</h4>'
+            grant_card_html += '<p><strong>Disease Focus:</strong> ' + str(grant_info['disease']) + '</p>'
+            grant_card_html += '<p><strong>Funding:</strong> $' + "{:,.0f}".format(grant_info['funding_amount']) + '</p>'
+            grant_card_html += '<p><strong>Year:</strong> ' + str(grant_info['grant_year']) + '</p>'
+            grant_card_html += '<p class="metric-highlight">Duration: ' + str(grant_info['research_duration']) + ' years</p>'
+            grant_card_html += '</div>'
+            
             st.markdown(grant_card_html, unsafe_allow_html=True)
     
     with col2:
@@ -344,7 +348,8 @@ def main():
         
         treatment_options = {}
         for _, row in summary_df.iterrows():
-            treatment_options[f"{row['treatment_name']} - {row['disease']}"] = row['network_id']
+            option_text = str(row['treatment_name']) + " - " + str(row['disease'])
+            treatment_options[option_text] = row['network_id']
         
         selected_treatment = st.selectbox(
             "Choose a breakthrough treatment:",
@@ -356,27 +361,24 @@ def main():
             selected_network_from_treatment = treatment_options[selected_treatment]
             treatment_info = summary_df[summary_df['network_id'] == selected_network_from_treatment].iloc[0]
             
-            treatment_card_html = f"""
-            <div class="selection-card treatment-card">
-                <h4>🎯 {treatment_info['treatment_name']}</h4>
-                <p><strong>Disease:</strong> {treatment_info['disease']}</p>
-                <p><strong>Approved:</strong> {treatment_info['approval_year']}</p>
-                <p><strong>Publications:</strong> {treatment_info['total_publications']}</p>
-                <p class="metric-highlight success-metric">✅ FDA Approved</p>
-            </div>
-            """
+            # Create treatment card HTML safely
+            treatment_card_html = '<div class="selection-card treatment-card">'
+            treatment_card_html += '<h4>🎯 ' + str(treatment_info['treatment_name']) + '</h4>'
+            treatment_card_html += '<p><strong>Disease:</strong> ' + str(treatment_info['disease']) + '</p>'
+            treatment_card_html += '<p><strong>Approved:</strong> ' + str(treatment_info['approval_year']) + '</p>'
+            treatment_card_html += '<p><strong>Publications:</strong> ' + str(treatment_info['total_publications']) + '</p>'
+            treatment_card_html += '<p class="metric-highlight success-metric">✅ FDA Approved</p>'
+            treatment_card_html += '</div>'
+            
             st.markdown(treatment_card_html, unsafe_allow_html=True)
     
     # Determine which network to show
     selected_network_id = None
-    selection_source = None
     
-    if 'grant_selector' in st.session_state and selected_grant:
+    if selected_grant and selected_grant in grant_options:
         selected_network_id = grant_options[selected_grant]
-        selection_source = "grant"
-    elif 'treatment_selector' in st.session_state and selected_treatment:
+    elif selected_treatment and selected_treatment in treatment_options:
         selected_network_id = treatment_options[selected_treatment]
-        selection_source = "treatment"
     
     # Show citation network if selection is made
     if selected_network_id:
@@ -386,7 +388,8 @@ def main():
         network_info = summary_df[summary_df['network_id'] == selected_network_id].iloc[0]
         
         # Network header
-        st.header(f"🕸️ Citation Network: {network_info['disease']} Research")
+        header_text = "🕸️ Citation Network: " + str(network_info['disease']) + " Research"
+        st.header(header_text)
         
         # Network stats
         network_nodes = nodes_df[nodes_df['network_id'] == selected_network_id]
@@ -405,7 +408,8 @@ def main():
             st.metric("Publications", publications)
         
         with col4:
-            st.metric("Research Duration", f"{network_info['research_duration']} years")
+            duration_text = str(network_info['research_duration']) + " years"
+            st.metric("Research Duration", duration_text)
         
         # Citation network visualization
         st.subheader("📊 Interactive Citation Network")
@@ -417,21 +421,5 @@ def main():
         st.info("""
         **How to read this network:**
         - 🔵 **Blue nodes** = Research grants providing funding
-        - 🔷 **Teal nodes** = Research publications and papers  
-        - 🟢 **Green nodes** = Breakthrough treatments
-        - **Lines** show citations and funding relationships
-        - **Hover** over nodes for detailed information
-        """)
-        
-        # Research pathway summary
-        st.subheader("📈 Research Impact Summary")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            research_summary = f"""
-            **🔬 Research Journey:**
-            - **Grant:** {network_info['grant_id']} ({network_info['grant_year']})
-            - **Funding:** ${network_info['funding_amount']:,.0f}
-            - **Publications:** {network_info['tota
+        - 🔷 **Teal nodes** = Research publication
 (Content truncated due to size limit. Use page ranges or line ranges to read remaining content)
