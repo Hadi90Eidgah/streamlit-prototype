@@ -1,5 +1,5 @@
 """
-Research Impact Dashboard - Selection-First Layout
+Research Impact Dashboard - Selection-First Layout (SYNTAX FIXED)
 Users choose a grant or treatment, then see the citation network
 Perfect for stakeholder presentations and fundraising demonstrations
 """
@@ -217,7 +217,7 @@ def create_citation_network(nodes_df, edges_df, selected_network_id):
                             text += f"Approval: {node.get('approval_year', 'N/A')}"
                         else:  # publication
                             text = f"Publication: {node.get('pmid', node['node_id'])}<br>"
-                            text += f"Title: {node.get('title', 'N/A')[:50]}...<br>"
+                            text += f"Title: {str(node.get('title', 'N/A'))[:50]}...<br>"
                             text += f"Year: {node.get('year', 'N/A')}"
                         
                         node_text.append(text)
@@ -328,7 +328,7 @@ def main():
             selected_network_from_grant = grant_options[selected_grant]
             grant_info = summary_df[summary_df['network_id'] == selected_network_from_grant].iloc[0]
             
-            st.markdown(f"""
+            grant_card_html = f"""
             <div class="selection-card grant-card">
                 <h4>📋 {grant_info['grant_id']}</h4>
                 <p><strong>Disease Focus:</strong> {grant_info['disease']}</p>
@@ -336,7 +336,8 @@ def main():
                 <p><strong>Year:</strong> {grant_info['grant_year']}</p>
                 <p class="metric-highlight">Duration: {grant_info['research_duration']} years</p>
             </div>
-            """, unsafe_allow_html=True)
+            """
+            st.markdown(grant_card_html, unsafe_allow_html=True)
     
     with col2:
         st.subheader("🎯 Select by Treatment")
@@ -355,7 +356,7 @@ def main():
             selected_network_from_treatment = treatment_options[selected_treatment]
             treatment_info = summary_df[summary_df['network_id'] == selected_network_from_treatment].iloc[0]
             
-            st.markdown(f"""
+            treatment_card_html = f"""
             <div class="selection-card treatment-card">
                 <h4>🎯 {treatment_info['treatment_name']}</h4>
                 <p><strong>Disease:</strong> {treatment_info['disease']}</p>
@@ -363,7 +364,8 @@ def main():
                 <p><strong>Publications:</strong> {treatment_info['total_publications']}</p>
                 <p class="metric-highlight success-metric">✅ FDA Approved</p>
             </div>
-            """, unsafe_allow_html=True)
+            """
+            st.markdown(treatment_card_html, unsafe_allow_html=True)
     
     # Determine which network to show
     selected_network_id = None
@@ -412,7 +414,7 @@ def main():
         st.plotly_chart(citation_fig, width='stretch')
         
         # Network explanation
-        st.info(f"""
+        st.info("""
         **How to read this network:**
         - 🔵 **Blue nodes** = Research grants providing funding
         - 🔷 **Teal nodes** = Research publications and papers  
@@ -427,11 +429,9 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown(f"""
+            research_summary = f"""
             **🔬 Research Journey:**
             - **Grant:** {network_info['grant_id']} ({network_info['grant_year']})
             - **Funding:** ${network_info['funding_amount']:,.0f}
-            - **Publications:** {network_info['total_publications']} research papers
-            - **Duration:** {network_info['research_duration']} years of research
-          
+            - **Publications:** {network_info['tota
 (Content truncated due to size limit. Use page ranges or line ranges to read remaining content)
