@@ -3,6 +3,7 @@ import pandas as pd
 import json
 from streamlit_agraph import agraph, Node, Edge, Config
 
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
