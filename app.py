@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 import json
 from streamlit_agraph import agraph, Node, Edge, Config
-
+import networkx as nx
+import matplotlib.pyplot as plt
+from io import BytesIO
 
 # ============================================================
 # PAGE CONFIGURATION
@@ -147,6 +149,92 @@ st.subheader("📊 Hierarchical Citation Tree")
 agraph(nodes=nodes, edges=edges, config=config)
 
 # ============================================================
+# 📸 EXPORT GRAPH AS HIGH-RES IMAGE (PDF / PNG)
+# ============================================================
+st.markdown("### 🖼️ Export Graph as High-Resolution Image")
+
+export_format = st.selectbox(
+    "Select export format:",
+    ["PNG", "PDF"]
+)
+
+if st.button("📤 Generate & Download Image"):
+    # Build graph with NetworkX
+    G = nx.DiGraph()
+    for _, row in df_edges.iterrows():
+        G.add_edge(row["source"], row["target"])
+
+    # Create color map
+    color_map = []
+    for _, row in df_filtered.iterrows():
+        if row["pubmed_id"] == "GIVINOSTAT":
+            color_map.append("#E63946")
+        elif row["funding_source"] == "Fondazione Telethon":
+            color_map.append("#2A9D8F")
+        elif row["pubmed_id"] == "FT2020-001":
+            color_map.append("#6D597A")
+        elif row["layer"] == 1:
+            color_map.append("#457B9D")
+        elif row["layer"] == 2:
+            color_map.append("#A8DADC")
+        elif row["layer"] == 3:
+            color_map.append("#BFD3C1")
+        else:
+            color_map.append("#CCCCCC")
+
+    # Layout by hierarchical layer
+    try:
+        pos = nx.multipartite_layout(
+            G, subset_key=lambda n: df_nodes.loc[df_nodes["pubmed_id"] == n, "layer"].values[0]
+        )
+    except Exception:
+        pos = nx.spring_layout(G, seed=42)
+
+    # Draw with matplotlib
+    fig, ax = plt.subplots(figsize=(12, 8))
+    nx.draw(
+        G, pos,
+        with_labels=False,
+        arrows=True,
+        node_color=color_map,
+        node_size=500,
+        edge_color="#AAAAAA",
+        alpha=0.9,
+        ax=ax
+    )
+
+    # Label key nodes
+    for node in ["FT2020-001", "GIVINOSTAT"]:
+        if node in G.nodes:
+            x, y = pos[node]
+            label = "FT Grant" if node == "FT2020-001" else "Givinostat (Treatment)"
+            ax.text(x, y + 0.05, label, fontsize=10, ha="center", color="black")
+
+    ax.set_title("Research Lineage Tree — Givinostat", fontsize=14, pad=20)
+    ax.axis("off")
+
+    # Save to chosen format
+    buf = BytesIO()
+    if export_format == "PNG":
+        plt.savefig(buf, format="png", dpi=300, bbox_inches="tight")
+        mime_type = "image/png"
+        file_name = "givinostat_graph.png"
+    else:
+        plt.savefig(buf, format="pdf", dpi=300, bbox_inches="tight")
+        mime_type = "application/pdf"
+        file_name = "givinostat_graph.pdf"
+
+    plt.close(fig)
+    buf.seek(0)
+
+    st.download_button(
+        label=f"💾 Download {export_format} Image",
+        data=buf,
+        file_name=file_name,
+        mime=mime_type
+    )
+
+# ============================================================
 # DOWNLOAD GRAPH DATA (STREAMLIT CLOUD SAFE)
 # ============================================================
 st.markdown("### 📥 Download Graph Data")
@@ -176,8 +264,8 @@ st.download_button(
 )
 
 st.info(
-    "💡 Tip: Open the JSON file in visualization tools like **Gephi**, **Cytoscape**, "
-    "or **GraphCommons** to export a high-resolution image for presentations."
+    "💡 Tip: Open the JSON file in tools like **Gephi**, **Cytoscape**, "
+    "or **GraphCommons** to produce advanced visualizations."
 )
 
 # ============================================================
