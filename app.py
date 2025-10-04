@@ -1,6 +1,7 @@
 """
-Research Impact Dashboard - Elegant Graph (Clean Version)
-Beautiful network visualization with no syntax errors
+Research Impact Dashboard - Final Version
+Beautiful network visualization matching Drawing.pdf style
+Perfect for stakeholder presentations and fundraising demonstrations
 """
 
 import streamlit as st
@@ -78,7 +79,7 @@ def create_sample_data():
     return nodes_df, edges_df, summary_df
 
 def create_elegant_network(nodes_df, edges_df, network_id):
-    """Create elegant network visualization"""
+    """Create elegant network visualization matching Drawing.pdf style"""
     try:
         network_nodes = nodes_df[nodes_df['network_id'] == network_id]
         network_edges = edges_df[edges_df['network_id'] == network_id]
@@ -91,21 +92,21 @@ def create_elegant_network(nodes_df, edges_df, network_id):
         treatments = network_nodes[network_nodes['node_type'] == 'treatment']
         publications = network_nodes[network_nodes['node_type'] == 'publication']
         
-        # Create elegant layout
+        # Create elegant layout matching Drawing.pdf
         node_positions = {}
         
-        # Position grant on the left
+        # Position grant (large blue circle) on the left
         if len(grants) > 0:
             grant_node = grants.iloc[0]
             node_positions[grant_node['node_id']] = (-4, 0)
         
-        # Position initial publications
+        # Position initial publications (gray circles) connected to grant
         initial_pubs = publications.head(4) if len(publications) >= 4 else publications
         for i, (_, pub) in enumerate(initial_pubs.iterrows()):
             y_pos = 1.5 - (i * 1.0)
             node_positions[pub['node_id']] = (-2, y_pos)
         
-        # Position research ecosystem
+        # Position research ecosystem (white circles) in organized clusters
         research_pubs = publications.iloc[4:] if len(publications) > 4 else pd.DataFrame()
         np.random.seed(42)
         
@@ -114,18 +115,18 @@ def create_elegant_network(nodes_df, edges_df, network_id):
             y_pos = np.random.uniform(-2, 2)
             node_positions[pub['node_id']] = (x_pos, y_pos)
         
-        # Position treatment pathway nodes
+        # Position treatment pathway nodes (yellow circles)
         treatment_pubs = publications.tail(3) if len(publications) >= 3 else publications.tail(len(publications))
         for i, (_, pub) in enumerate(treatment_pubs.iterrows()):
             y_pos = 0.8 - (i * 0.8)
             node_positions[pub['node_id']] = (4, y_pos)
         
-        # Position treatment on the right
+        # Position treatment (large green circle) on the right
         if len(treatments) > 0:
             treatment_node = treatments.iloc[0]
             node_positions[treatment_node['node_id']] = (6, 0)
         
-        # Create edges
+        # Create clean edges
         edge_x = []
         edge_y = []
         
@@ -138,18 +139,19 @@ def create_elegant_network(nodes_df, edges_df, network_id):
         
         edge_trace = go.Scatter(
             x=edge_x, y=edge_y,
-            line=dict(width=2, color='#888'),
+            line=dict(width=2, color='#888', dash='solid'),
             hoverinfo='none',
             mode='lines',
-            showlegend=False
+            showlegend=False,
+            opacity=0.6
         )
         
-        # Create node traces
+        # Create node traces with elegant styling
         node_traces = []
         colors = {'grant': '#1f4e79', 'publication': '#d1d5db', 'treatment': '#059669'}
         sizes = {'grant': 40, 'publication': 12, 'treatment': 35}
         
-        # Special nodes for treatment pathway
+        # Identify treatment pathway nodes for special styling
         treatment_pathway_nodes = treatment_pubs['node_id'].tolist() if len(treatment_pubs) > 0 else []
         
         for node_type in ['grant', 'publication', 'treatment']:
@@ -168,26 +170,26 @@ def create_elegant_network(nodes_df, edges_df, network_id):
                         node_x.append(x)
                         node_y.append(y)
                         
-                        # Special styling for treatment pathway
+                        # Special styling for treatment pathway nodes
                         if node['node_id'] in treatment_pathway_nodes:
                             node_colors.append('#fbbf24')  # Yellow
                             node_sizes.append(18)
-                            text = "🟡 KEY RESEARCH"
+                            text = "🟡 KEY RESEARCH<br>Treatment Pathway"
                         else:
                             node_colors.append(colors[node_type])
                             node_sizes.append(sizes[node_type])
                             
                             if node_type == 'grant':
-                                text = "🔵 GRANT"
+                                text = "🔵 RESEARCH GRANT<br>Funding Source"
                             elif node_type == 'treatment':
-                                text = "🟢 TREATMENT"
+                                text = "🟢 BREAKTHROUGH TREATMENT<br>FDA Approved"
                             else:
-                                text = "⚪ RESEARCH"
+                                text = "⚪ RESEARCH PUBLICATION<br>Supporting Evidence"
                         
                         node_text.append(text)
                 
                 if node_x:
-                    # Group by color
+                    # Group nodes by color for clean legend
                     unique_colors = list(set(node_colors))
                     
                     for color in unique_colors:
@@ -199,14 +201,15 @@ def create_elegant_network(nodes_df, edges_df, network_id):
                             trace_text = [node_text[i] for i in color_indices]
                             trace_sizes = [node_sizes[i] for i in color_indices]
                             
+                            # Determine trace name for legend
                             if color == '#fbbf24':
-                                trace_name = "Treatment Pathway"
+                                trace_name = "🟡 Treatment Pathway"
                             elif node_type == 'grant':
-                                trace_name = "Research Grant"
+                                trace_name = "🔵 Research Grant"
                             elif node_type == 'treatment':
-                                trace_name = "Breakthrough Treatment"
+                                trace_name = "🟢 Breakthrough Treatment"
                             else:
-                                trace_name = "Research Publications"
+                                trace_name = "⚪ Research Publications"
                             
                             node_trace = go.Scatter(
                                 x=trace_x, y=trace_y,
@@ -224,19 +227,43 @@ def create_elegant_network(nodes_df, edges_df, network_id):
                             )
                             node_traces.append(node_trace)
         
-        # Create figure
+        # Create elegant figure
         fig = go.Figure(data=[edge_trace] + node_traces)
         
         fig.update_layout(
-            title="Research Impact Network",
+            title={
+                'text': "Research Impact Network",
+                'x': 0.5,
+                'xanchor': 'center',
+                'font': {'size': 20, 'color': '#1f4e79'}
+            },
             showlegend=True,
             hovermode='closest',
             margin=dict(b=40, l=40, r=40, t=60),
-            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-5, 7]),
-            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-3, 3]),
+            xaxis=dict(
+                showgrid=False, 
+                zeroline=False, 
+                showticklabels=False,
+                range=[-5, 7]
+            ),
+            yaxis=dict(
+                showgrid=False, 
+                zeroline=False, 
+                showticklabels=False,
+                range=[-3, 3]
+            ),
             height=600,
             plot_bgcolor='white',
-            paper_bgcolor='white'
+            paper_bgcolor='white',
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01,
+                bgcolor="rgba(255,255,255,0.8)",
+                bordercolor="rgba(0,0,0,0.2)",
+                borderwidth=1
+            )
         )
         
         return fig
@@ -261,7 +288,8 @@ def main():
     exploration_method = st.radio(
         "Choose your exploration method:",
         options=["Select by Grant (Funding Source)", "Select by Treatment (Research Outcome)"],
-        index=0
+        index=0,
+        help="Choose whether to start from the funding source or the final treatment outcome"
     )
     
     st.markdown("---")
@@ -293,14 +321,15 @@ def main():
             grant_card += '<p><strong>Disease Focus:</strong> ' + str(grant_info['disease']) + '</p>'
             grant_card += '<p><strong>Funding Amount:</strong> $' + "{:,.0f}".format(grant_info['funding_amount']) + '</p>'
             grant_card += '<p><strong>Grant Year:</strong> ' + str(grant_info['grant_year']) + '</p>'
-            grant_card += '<p class="success-metric">✅ Led to: ' + str(grant_info['treatment_name']) + '</p>'
+            grant_card += '<p><strong>Research Duration:</strong> ' + str(grant_info['research_duration']) + ' years</p>'
+            grant_card += '<p class="success-metric">✅ Led to FDA-approved treatment: ' + str(grant_info['treatment_name']) + '</p>'
             grant_card += '</div>'
             
             st.markdown(grant_card, unsafe_allow_html=True)
     
     else:
         st.header("🎯 Select Breakthrough Treatment")
-        st.write("Choose a breakthrough treatment to see the research pathway:")
+        st.write("Choose a breakthrough treatment to see the research pathway that led to its development:")
         
         treatment_options = {}
         for _, row in summary_df.iterrows():
@@ -319,15 +348,16 @@ def main():
             
             treatment_card = '<div class="selection-card treatment-card">'
             treatment_card += '<h3>🎯 ' + str(treatment_info['treatment_name']) + '</h3>'
-            treatment_card += '<p><strong>Disease:</strong> ' + str(treatment_info['disease']) + '</p>'
-            treatment_card += '<p><strong>Approved:</strong> ' + str(treatment_info['approval_year']) + '</p>'
-            treatment_card += '<p><strong>Publications:</strong> ' + str(treatment_info['total_publications']) + '</p>'
-            treatment_card += '<p class="success-metric">💰 Grant: ' + str(treatment_info['grant_id']) + '</p>'
+            treatment_card += '<p><strong>Disease Treated:</strong> ' + str(treatment_info['disease']) + '</p>'
+            treatment_card += '<p><strong>FDA Approval Year:</strong> ' + str(treatment_info['approval_year']) + '</p>'
+            treatment_card += '<p><strong>Research Publications:</strong> ' + str(treatment_info['total_publications']) + ' papers</p>'
+            treatment_card += '<p><strong>Development Time:</strong> ' + str(treatment_info['research_duration']) + ' years</p>'
+            treatment_card += '<p class="success-metric">💰 Original Grant: ' + str(treatment_info['grant_id']) + ' ($' + "{:,.0f}".format(treatment_info['funding_amount']) + ')</p>'
             treatment_card += '</div>'
             
             st.markdown(treatment_card, unsafe_allow_html=True)
     
-    # Show network if selected
+    # Show elegant network if selection is made
     if selected_network_id:
         st.markdown("---")
         
@@ -354,37 +384,74 @@ def main():
         with col4:
             st.metric("Duration", str(network_info['research_duration']) + " years")
         
-        # Show network
+        # Show elegant network
         st.subheader("📊 Research Impact Network")
         
         fig = create_elegant_network(nodes_df, edges_df, selected_network_id)
         st.plotly_chart(fig, width='stretch')
         
-        # Explanation
+        # Network explanation
         explanation = "**How to read this network:**\n"
         explanation += "- 🔵 **Blue circle** = Research grant (funding source)\n"
         explanation += "- ⚪ **Gray circles** = Research publications\n"
         explanation += "- 🟡 **Yellow circles** = Key research leading to treatment\n"
-        explanation += "- 🟢 **Green circle** = Breakthrough treatment\n"
-        explanation += "- **Lines** show research connections"
+        explanation += "- 🟢 **Green circle** = Breakthrough treatment (FDA approved)\n"
+        explanation += "- **Lines** show research connections and funding flow"
         
         st.info(explanation)
         
-        # Impact summary
-        st.subheader("📈 Research Impact Story")
+        # Research impact summary
+        st.subheader("📈 Complete Research Impact Story")
         
         col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("**🔬 Research Journey:**")
-            st.write("Grant: " + str(network_info['grant_id']))
-            st.write("Funding: $" + "{:,.0f}".format(network_info['funding_amount']))
-            st.write("Publications: " + str(network_info['total_publications']))
-            st.write("Duration: " + str(network_info['research_duration']) + " years")
+            st.write("**Grant:** " + str(network_info['grant_id']) + " (" + str(network_info['grant_year']) + ")")
+            st.write("**Funding:** $" + "{:,.0f}".format(network_info['funding_amount']))
+            st.write("**Publications:** " + str(network_info['total_publications']) + " research papers")
+            st.write("**Research Duration:** " + str(network_info['research_duration']) + " years")
         
         with col2:
             st.markdown("**🎯 Breakthrough Outcome:**")
-            st.write("Treatment: " + str(network_info['treatment_name']))
-            st.write("Disease: " + str(network_info['disease']))
-            st.write
-(Content truncated due to size limit. Use page ranges or line ranges to read remaining content)
+            st.write("**Treatment:** " + str(network_info['treatment_name']))
+            st.write("**Disease:** " + str(network_info['disease']))
+            st.write("**FDA Approval:** " + str(network_info['approval_year']))
+            st.write("**Status:** ✅ Successfully Approved")
+        
+        # ROI calculation
+        cost_per_pub = network_info['funding_amount'] / network_info['total_publications']
+        roi_text = "This $" + "{:,.0f}".format(network_info['funding_amount']) + " grant "
+        roi_text += "generated " + str(network_info['total_publications']) + " publications "
+        roi_text += "($" + "{:,.0f}".format(cost_per_pub) + " per publication) "
+        roi_text += "and led to FDA approval in " + str(network_info['research_duration']) + " years."
+        
+        st.success("💰 **Return on Investment:** " + roi_text)
+        
+        # Call to action
+        st.markdown("---")
+        cta_text = "**🎯 This demonstrates how institutional funding directly creates breakthrough treatments!**"
+        st.markdown('<p style="text-align: center; font-size: 1.3rem; color: #28a745; font-weight: bold;">' + cta_text + '</p>', unsafe_allow_html=True)
+    
+    else:
+        # Show overall summary
+        st.markdown("---")
+        st.header("📊 Overall Research Impact")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            total_funding = summary_df['funding_amount'].sum()
+            st.metric("Total Investment", "$" + "{:,.0f}".format(total_funding))
+        
+        with col2:
+            total_pubs = summary_df['total_publications'].sum()
+            st.metric("Total Publications", "{:,}".format(total_pubs))
+        
+        with col3:
+            st.metric("Success Rate", "100%", help="All grants led to approved treatments")
+        
+        st.info("👆 **Choose your exploration method above, then select a specific grant or treatment to see the elegant research network.**")
+
+if __name__ == "__main__":
+    main()
