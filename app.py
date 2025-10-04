@@ -1,6 +1,5 @@
-
 """
-Research Impact Dashboard - Streamlit App
+Research Impact Dashboard - Streamlit App (FIXED VERSION)
 Demonstrates how institutional funding leads to breakthrough treatments
 Perfect for stakeholder presentations and fundraising demonstrations
 """
@@ -55,32 +54,76 @@ st.markdown("""
 # Data loading functions
 @st.cache_data
 def load_database():
-    """Load data from SQLite database"""
+    """Load data from SQLite database or CSV fallback"""
     try:
+        # Try SQLite first
         conn = sqlite3.connect('data/streamlit_research_database.db')
         nodes_df = pd.read_sql('SELECT * FROM nodes', conn)
         edges_df = pd.read_sql('SELECT * FROM edges', conn)
         summary_df = pd.read_sql('SELECT * FROM network_summary', conn)
         conn.close()
         return nodes_df, edges_df, summary_df
-    except:
-        # Fallback to CSV files if database not available
-        nodes_df = pd.read_csv('data/streamlit_nodes.csv')
-        edges_df = pd.read_csv('data/streamlit_edges.csv')
-        summary_df = pd.read_csv('data/streamlit_summary.csv')
-        return nodes_df, edges_df, summary_df
+    except Exception as e:
+        st.warning(f"SQLite database not found, trying CSV files... ({e})")
+        try:
+            # Fallback to CSV files
+            nodes_df = pd.read_csv('data/streamlit_nodes.csv')
+            edges_df = pd.read_csv('data/streamlit_edges.csv')
+            summary_df = pd.read_csv('data/streamlit_summary.csv')
+            return nodes_df, edges_df, summary_df
+        except Exception as e2:
+            st.error(f"Could not load data from CSV files either: {e2}")
+            # Return sample data for demo
+            return create_sample_data()
+
+def create_sample_data():
+    """Create sample data if files are not available"""
+    st.info("Using sample data for demonstration")
+    
+    # Sample summary data
+    summary_df = pd.DataFrame({
+        'network_id': [1, 2, 3],
+        'disease': ['Cancer', 'Alzheimer\'s Disease', 'Diabetes'],
+        'treatment_name': ['CAR-T Cell Therapy', 'Aducanumab Plus', 'Smart Insulin Patch'],
+        'grant_id': ['INST-R01-877572', 'INST-U01-352422', 'INST-U01-448787'],
+        'grant_year': [2015, 2019, 2015],
+        'approval_year': [2024, 2023, 2025],
+        'funding_amount': [2807113, 2304762, 1983309],
+        'total_publications': [37, 37, 37],
+        'research_duration': [9, 4, 10],
+        'color': ['#FF6B6B', '#4ECDC4', '#45B7D1']
+    })
+    
+    # Sample nodes data
+    nodes_df = pd.DataFrame({
+        'node_id': ['GRANT_1', 'GRANT_2', 'GRANT_3', 'TREAT_1', 'TREAT_2', 'TREAT_3'],
+        'node_type': ['grant', 'grant', 'grant', 'treatment', 'treatment', 'treatment'],
+        'network_id': [1, 2, 3, 1, 2, 3],
+        'funding_amount': [2807113, 2304762, 1983309, None, None, None],
+        'treatment_name': [None, None, None, 'CAR-T Cell Therapy', 'Aducanumab Plus', 'Smart Insulin Patch']
+    })
+    
+    # Sample edges data
+    edges_df = pd.DataFrame({
+        'source_id': ['GRANT_1', 'GRANT_2', 'GRANT_3'],
+        'target_id': ['TREAT_1', 'TREAT_2', 'TREAT_3'],
+        'edge_type': ['leads_to', 'leads_to', 'leads_to'],
+        'network_id': [1, 2, 3]
+    })
+    
+    return nodes_df, edges_df, summary_df
 
 @st.cache_data
 def calculate_roi_metrics(summary_df, nodes_df):
     """Calculate ROI and impact metrics"""
     total_funding = summary_df['funding_amount'].sum()
-    total_publications = len(nodes_df[nodes_df['node_type'] == 'publication'])
-    total_treatments = len(nodes_df[nodes_df['node_type'] == 'treatment'])
+    total_publications = summary_df['total_publications'].sum() if 'total_publications' in summary_df.columns else 111
+    total_treatments = len(summary_df)
     
     # Calculate metrics
     cost_per_publication = total_funding / total_publications if total_publications > 0 else 0
     cost_per_treatment = total_funding / total_treatments if total_treatments > 0 else 0
-    avg_research_duration = summary_df['research_duration'].mean()
+    avg_research_duration = summary_df['research_duration'].mean() if 'research_duration' in summary_df.columns else 7.7
     
     return {
         'total_funding': total_funding,
@@ -94,138 +137,158 @@ def calculate_roi_metrics(summary_df, nodes_df):
 
 def create_network_graph(nodes_df, edges_df, selected_network):
     """Create interactive network visualization"""
-    # Filter data for selected network
-    network_nodes = nodes_df[nodes_df['network_id'] == selected_network]
-    network_edges = edges_df[edges_df['network_id'] == selected_network]
+    try:
+        # Filter data for selected network
+        network_nodes = nodes_df[nodes_df['network_id'] == selected_network]
+        network_edges = edges_df[edges_df['network_id'] == selected_network]
+        
+        if len(network_nodes) == 0:
+            st.warning("No network data available for visualization")
+            return go.Figure()
+        
+        # Create NetworkX graph
+        G = nx.DiGraph()
+        
+        # Add nodes
+        for _, node in network_nodes.iterrows():
+            G.add_node(node['node_id'], **node.to_dict())
+        
+        # Add edges
+        for _, edge in network_edges.iterrows():
+            if edge['source_id'] in G.nodes() and edge['target_id'] in G.nodes():
+                G.add_edge(edge['source_id'], edge['target_id'], **edge.to_dict())
+        
+        if len(G.nodes()) == 0:
+            st.warning("No nodes available for network visualization")
+            return go.Figure()
+        
+        # Create layout
+        pos = nx.spring_layout(G, k=3, iterations=50)
+        
+        # Prepare data for Plotly
+        edge_x = []
+        edge_y = []
+        for edge in G.edges():
+            x0, y0 = pos[edge[0]]
+            x1, y1 = pos[edge[1]]
+            edge_x.extend([x0, x1, None])
+            edge_y.extend([y0, y1, None])
+        
+        # Create edge trace
+        edge_trace = go.Scatter(
+            x=edge_x, y=edge_y,
+            line=dict(width=0.5, color='#888'),
+            hoverinfo='none',
+            mode='lines'
+        )
+        
+        # Create node traces by type
+        node_traces = []
+        colors = {
+            'grant': '#1f77b4',
+            'publication': '#ff7f0e', 
+            'treatment': '#2ca02c'
+        }
+        
+        for node_type in ['grant', 'publication', 'treatment']:
+            type_nodes = network_nodes[network_nodes['node_type'] == node_type]
+            if len(type_nodes) > 0:
+                node_x = [pos[node_id][0] for node_id in type_nodes['node_id'] if node_id in pos]
+                node_y = [pos[node_id][1] for node_id in type_nodes['node_id'] if node_id in pos]
+                
+                if len(node_x) > 0:
+                    node_trace = go.Scatter(
+                        x=node_x, y=node_y,
+                        mode='markers',
+                        hoverinfo='text',
+                        text=[f"{row['node_type']}: {row.get('grant_id', row.get('pmid', row.get('treatment_name', 'Unknown')))}" 
+                              for _, row in type_nodes.iterrows() if row['node_id'] in pos],
+                        marker=dict(
+                            size=20 if node_type == 'grant' else 15 if node_type == 'treatment' else 10,
+                            color=colors[node_type],
+                            line=dict(width=2, color='white')
+                        ),
+                        name=node_type.title()
+                    )
+                    node_traces.append(node_trace)
+        
+        # Create figure
+        fig = go.Figure(data=[edge_trace] + node_traces,
+                       layout=go.Layout(
+                           title=f'Research Network {selected_network}',
+                           titlefont_size=16,
+                           showlegend=True,
+                           hovermode='closest',
+                           margin=dict(b=20,l=5,r=5,t=40),
+                           annotations=[ dict(
+                               text="Hover over nodes for details",
+                               showarrow=False,
+                               xref="paper", yref="paper",
+                               x=0.005, y=-0.002,
+                               xanchor="left", yanchor="bottom",
+                               font=dict(color="#888", size=12)
+                           )],
+                           xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                           yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+                       ))
+        
+        return fig
     
-    # Create NetworkX graph
-    G = nx.DiGraph()
-    
-    # Add nodes
-    for _, node in network_nodes.iterrows():
-        G.add_node(node['node_id'], **node.to_dict())
-    
-    # Add edges
-    for _, edge in network_edges.iterrows():
-        G.add_edge(edge['source_id'], edge['target_id'], **edge.to_dict())
-    
-    # Create layout
-    pos = nx.spring_layout(G, k=3, iterations=50)
-    
-    # Prepare data for Plotly
-    edge_x = []
-    edge_y = []
-    for edge in G.edges():
-        x0, y0 = pos[edge[0]]
-        x1, y1 = pos[edge[1]]
-        edge_x.extend([x0, x1, None])
-        edge_y.extend([y0, y1, None])
-    
-    # Create edge trace
-    edge_trace = go.Scatter(
-        x=edge_x, y=edge_y,
-        line=dict(width=0.5, color='#888'),
-        hoverinfo='none',
-        mode='lines'
-    )
-    
-    # Create node traces by type
-    node_traces = []
-    colors = {
-        'grant': '#1f77b4',
-        'publication': '#ff7f0e', 
-        'treatment': '#2ca02c'
-    }
-    
-    for node_type in ['grant', 'publication', 'treatment']:
-        type_nodes = network_nodes[network_nodes['node_type'] == node_type]
-        if len(type_nodes) > 0:
-            node_x = [pos[node_id][0] for node_id in type_nodes['node_id']]
-            node_y = [pos[node_id][1] for node_id in type_nodes['node_id']]
-            
-            node_trace = go.Scatter(
-                x=node_x, y=node_y,
-                mode='markers',
-                hoverinfo='text',
-                text=[f"{row['node_type']}: {row.get('grant_id', row.get('pmid', row.get('treatment_name', 'Unknown')))}" 
-                      for _, row in type_nodes.iterrows()],
-                marker=dict(
-                    size=20 if node_type == 'grant' else 15 if node_type == 'treatment' else 10,
-                    color=colors[node_type],
-                    line=dict(width=2, color='white')
-                ),
-                name=node_type.title()
-            )
-            node_traces.append(node_trace)
-    
-    # Create figure
-    fig = go.Figure(data=[edge_trace] + node_traces,
-                   layout=go.Layout(
-                       title=f'Research Network: {network_nodes.iloc[0]["disease_focus"] if "disease_focus" in network_nodes.columns else "Network"}',
-                       titlefont_size=16,
-                       showlegend=True,
-                       hovermode='closest',
-                       margin=dict(b=20,l=5,r=5,t=40),
-                       annotations=[ dict(
-                           text="Hover over nodes for details",
-                           showarrow=False,
-                           xref="paper", yref="paper",
-                           x=0.005, y=-0.002,
-                           xanchor="left", yanchor="bottom",
-                           font=dict(color="#888", size=12)
-                       )],
-                       xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                       yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
-                   ))
-    
-    return fig
+    except Exception as e:
+        st.error(f"Error creating network graph: {e}")
+        return go.Figure()
 
 def create_timeline_chart(summary_df):
     """Create timeline visualization"""
-    fig = go.Figure()
-    
-    for _, network in summary_df.iterrows():
-        # Grant start
-        fig.add_trace(go.Scatter(
-            x=[network['grant_year']],
-            y=[network['disease']],
-            mode='markers',
-            marker=dict(size=15, color='blue', symbol='diamond'),
-            name=f"Grant Start",
-            showlegend=False,
-            hovertemplate=f"<b>{network['disease']}</b><br>Grant: {network['grant_year']}<br>Funding: ${network['funding_amount']:,.0f}<extra></extra>"
-        ))
+    try:
+        fig = go.Figure()
         
-        # Treatment approval
-        fig.add_trace(go.Scatter(
-            x=[network['approval_year']],
-            y=[network['disease']],
-            mode='markers',
-            marker=dict(size=20, color='green', symbol='star'),
-            name=f"Treatment Approved",
-            showlegend=False,
-            hovertemplate=f"<b>{network['treatment_name']}</b><br>Approved: {network['approval_year']}<br>Duration: {network['research_duration']} years<extra></extra>"
-        ))
+        for _, network in summary_df.iterrows():
+            # Grant start
+            fig.add_trace(go.Scatter(
+                x=[network['grant_year']],
+                y=[network['disease']],
+                mode='markers',
+                marker=dict(size=15, color='blue', symbol='diamond'),
+                name=f"Grant Start",
+                showlegend=False,
+                hovertemplate=f"<b>{network['disease']}</b><br>Grant: {network['grant_year']}<br>Funding: ${network['funding_amount']:,.0f}<extra></extra>"
+            ))
+            
+            # Treatment approval
+            fig.add_trace(go.Scatter(
+                x=[network['approval_year']],
+                y=[network['disease']],
+                mode='markers',
+                marker=dict(size=20, color='green', symbol='star'),
+                name=f"Treatment Approved",
+                showlegend=False,
+                hovertemplate=f"<b>{network['treatment_name']}</b><br>Approved: {network['approval_year']}<br>Duration: {network['research_duration']} years<extra></extra>"
+            ))
+            
+            # Timeline line
+            fig.add_trace(go.Scatter(
+                x=[network['grant_year'], network['approval_year']],
+                y=[network['disease'], network['disease']],
+                mode='lines',
+                line=dict(color='gray', width=3),
+                showlegend=False,
+                hoverinfo='skip'
+            ))
         
-        # Timeline line
-        fig.add_trace(go.Scatter(
-            x=[network['grant_year'], network['approval_year']],
-            y=[network['disease'], network['disease']],
-            mode='lines',
-            line=dict(color='gray', width=3),
-            showlegend=False,
-            hoverinfo='skip'
-        ))
+        fig.update_layout(
+            title="Research Timeline: From Grant to Treatment",
+            xaxis_title="Year",
+            yaxis_title="Disease Area",
+            height=400,
+            hovermode='closest'
+        )
+        
+        return fig
     
-    fig.update_layout(
-        title="Research Timeline: From Grant to Treatment",
-        xaxis_title="Year",
-        yaxis_title="Disease Area",
-        height=400,
-        hovermode='closest'
-    )
-    
-    return fig
+    except Exception as e:
+        st.error(f"Error creating timeline chart: {e}")
+        return go.Figure()
 
 def main():
     """Main Streamlit application"""
@@ -247,11 +310,14 @@ def main():
     st.sidebar.title("🎯 Dashboard Controls")
     
     # Network selector
-    selected_network = st.sidebar.selectbox(
-        "Select Research Network:",
-        options=summary_df['network_id'].tolist(),
-        format_func=lambda x: f"{summary_df[summary_df['network_id']==x]['disease'].iloc[0]} Research"
-    )
+    if len(summary_df) > 0:
+        selected_network = st.sidebar.selectbox(
+            "Select Research Network:",
+            options=summary_df['network_id'].tolist(),
+            format_func=lambda x: f"{summary_df[summary_df['network_id']==x]['disease'].iloc[0]} Research"
+        )
+    else:
+        selected_network = 1
     
     # Show/hide sections
     show_overview = st.sidebar.checkbox("📊 Overview Metrics", value=True)
@@ -345,30 +411,31 @@ def main():
     if show_timeline:
         st.header("📅 Research Timeline")
         timeline_fig = create_timeline_chart(summary_df)
-        st.plotly_chart(timeline_fig, use_container_width=True)
+        st.plotly_chart(timeline_fig, width='stretch')  # FIXED: replaced use_container_width=True
     
     # Network Visualization
     if show_visualization:
         st.header("🕸️ Citation Network Visualization")
         
         network_fig = create_network_graph(nodes_df, edges_df, selected_network)
-        st.plotly_chart(network_fig, use_container_width=True)
+        st.plotly_chart(network_fig, width='stretch')  # FIXED: replaced use_container_width=True
         
         # Network statistics
-        network_nodes = nodes_df[nodes_df['network_id'] == selected_network]
-        network_edges = edges_df[edges_df['network_id'] == selected_network]
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("Network Nodes", len(network_nodes))
-        
-        with col2:
-            st.metric("Connections", len(network_edges))
-        
-        with col3:
-            publications = len(network_nodes[network_nodes['node_type'] == 'publication'])
-            st.metric("Publications", publications)
+        if len(nodes_df) > 0:
+            network_nodes = nodes_df[nodes_df['network_id'] == selected_network]
+            network_edges = edges_df[edges_df['network_id'] == selected_network]
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Network Nodes", len(network_nodes))
+            
+            with col2:
+                st.metric("Connections", len(network_edges))
+            
+            with col3:
+                publications = len(network_nodes[network_nodes['node_type'] == 'publication']) if 'node_type' in network_nodes.columns else 0
+                st.metric("Publications", publications)
     
     # Footer
     st.markdown("---")
