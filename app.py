@@ -128,6 +128,83 @@ def get_node_color(node_id, node_type, ft_funded, citing_ft, approval, treatment
     
     return base_color
 
+def create_hierarchical_layout(nodes_df, edges_df):
+    """Create a hierarchical tree layout based on the logical flow"""
+    # Create NetworkX graph
+    G = nx.DiGraph()
+    
+    # Add nodes
+    for _, node in nodes_df.iterrows():
+        G.add_node(node['node_id'], **node.to_dict())
+    
+    # Add edges (reverse direction for proper hierarchy)
+    for _, edge in edges_df.iterrows():
+        if edge['edge_type'] == 'funded_by':
+            G.add_edge(edge['source_id'], edge['target_id'])  # grant -> paper
+        elif edge['edge_type'] == 'cites':
+            G.add_edge(edge['target_id'], edge['source_id'])  # cited -> citing
+        elif edge['edge_type'] == 'led_to_approval':
+            G.add_edge(edge['source_id'], edge['target_id'])  # paper -> treatment
+    
+    # Find the grant node (root)
+    grant_nodes = [node for node in G.nodes() if G.nodes[node]['node_type'] == 'grant']
+    if not grant_nodes:
+        # Fallback to spring layout if no grant found
+        return nx.spring_layout(G, k=3, iterations=50, seed=42)
+    
+    root = grant_nodes[0]
+    
+    # Calculate levels using BFS from the grant
+    levels = {}
+    queue = [(root, 0)]
+    visited = {root}
+    max_level = 0
+    
+    while queue:
+        node, level = queue.pop(0)
+        levels[node] = level
+        max_level = max(max_level, level)
+        
+        # Add children to queue
+        for neighbor in G.neighbors(node):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, level + 1))
+    
+    # Assign positions based on levels
+    pos = {}
+    level_counts = {}
+    level_positions = {}
+    
+    # Count nodes per level
+    for node, level in levels.items():
+        if level not in level_counts:
+            level_counts[level] = 0
+            level_positions[level] = 0
+        level_counts[level] += 1
+    
+    # Position nodes
+    for node, level in levels.items():
+        x = level * 2  # Horizontal spacing between levels
+        
+        # Vertical spacing within level
+        total_in_level = level_counts[level]
+        if total_in_level == 1:
+            y = 0
+        else:
+            y_spacing = 3.0 / max(1, total_in_level - 1)
+            y = -1.5 + level_positions[level] * y_spacing
+        
+        pos[node] = (x, y)
+        level_positions[level] += 1
+    
+    # Handle nodes not reached by BFS (disconnected components)
+    for node in G.nodes():
+        if node not in pos:
+            pos[node] = (max_level + 2, 0)
+    
+    return pos
+
 def create_network_graph(nodes_df, edges_df):
     """Create an interactive network graph using Plotly"""
     # Create NetworkX graph for layout
@@ -137,12 +214,12 @@ def create_network_graph(nodes_df, edges_df):
     for _, node in nodes_df.iterrows():
         G.add_node(node['node_id'], **node.to_dict())
     
-    # Add edges
+    # Add edges (keep original direction for display)
     for _, edge in edges_df.iterrows():
         G.add_edge(edge['source_id'], edge['target_id'], **edge.to_dict())
     
-    # Calculate layout
-    pos = nx.spring_layout(G, k=3, iterations=50, seed=42)
+    # Calculate hierarchical layout
+    pos = create_hierarchical_layout(nodes_df, edges_df)
     
     # Classify nodes
     ft_funded, citing_ft, approval, treatment = classify_nodes(nodes_df, edges_df)
@@ -211,12 +288,13 @@ def create_network_graph(nodes_df, edges_df):
         edge_x.extend([x0, x1, None])
         edge_y.extend([y0, y1, None])
     
-    # Create edge trace
+    # Create edge trace with better styling
     edge_trace = go.Scatter(
         x=edge_x, y=edge_y,
-        line=dict(width=1, color='#888'),
+        line=dict(width=2, color='#666'),
         hoverinfo='none',
-        mode='lines'
+        mode='lines',
+        opacity=0.7
     )
     
     # Create node trace
@@ -240,22 +318,23 @@ def create_network_graph(nodes_df, edges_df):
     
     # Update layout separately to avoid compatibility issues
     fig.update_layout(
-        title='Research Grant to Treatment Lineage',
-        title_font_size=16,
+        title='Research Grant to Treatment Lineage - Hierarchical Flow',
+        title_font_size=18,
         showlegend=False,
         hovermode='closest',
-        margin=dict(b=20,l=5,r=5,t=40),
+        margin=dict(b=40,l=40,r=40,t=60),
         annotations=[dict(
-            text="Click on nodes to see details. Hover for quick information.",
+            text="Grant (left) → FT Papers → Citations → Approval → Treatment (right). Hover for details.",
             showarrow=False,
             xref="paper", yref="paper",
-            x=0.005, y=-0.002,
-            xanchor='left', yanchor='bottom',
-            font=dict(color='#888', size=12)
+            x=0.5, y=-0.05,
+            xanchor='center', yanchor='top',
+            font=dict(color='#666', size=14)
         )],
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        plot_bgcolor='white'
+        plot_bgcolor='white',
+        height=600
     )
     
     return fig
