@@ -1,7 +1,6 @@
 """
-Research Impact Dashboard - Final Version
-Beautiful network visualization matching Drawing.pdf style
-Perfect for stakeholder presentations and fundraising demonstrations
+Research Impact Dashboard - Improved Visualization
+Enhanced edge styling with highlighted grant connections and transparent background edges
 """
 
 import streamlit as st
@@ -78,8 +77,8 @@ def create_sample_data():
     
     return nodes_df, edges_df, summary_df
 
-def create_elegant_network(nodes_df, edges_df, network_id):
-    """Create elegant network visualization matching Drawing.pdf style"""
+def create_improved_network(nodes_df, edges_df, network_id):
+    """Create improved network visualization with better edge styling"""
     try:
         network_nodes = nodes_df[nodes_df['network_id'] == network_id]
         network_edges = edges_df[edges_df['network_id'] == network_id]
@@ -92,67 +91,149 @@ def create_elegant_network(nodes_df, edges_df, network_id):
         treatments = network_nodes[network_nodes['node_type'] == 'treatment']
         publications = network_nodes[network_nodes['node_type'] == 'publication']
         
-        # Create elegant layout matching Drawing.pdf
+        # Create improved layout with better spacing
         node_positions = {}
         
         # Position grant (large blue circle) on the left
+        grant_node_id = None
         if len(grants) > 0:
             grant_node = grants.iloc[0]
-            node_positions[grant_node['node_id']] = (-4, 0)
+            grant_node_id = grant_node['node_id']
+            node_positions[grant_node_id] = (-5, 0)
         
-        # Position initial publications (gray circles) connected to grant
+        # Position initial publications (directly funded by grant) with better spacing
         initial_pubs = publications.head(4) if len(publications) >= 4 else publications
+        initial_pub_ids = []
         for i, (_, pub) in enumerate(initial_pubs.iterrows()):
-            y_pos = 1.5 - (i * 1.0)
-            node_positions[pub['node_id']] = (-2, y_pos)
+            y_pos = 2 - (i * 1.3)  # Better vertical spacing
+            node_positions[pub['node_id']] = (-2.5, y_pos)
+            initial_pub_ids.append(pub['node_id'])
         
-        # Position research ecosystem (white circles) in organized clusters
+        # Position research ecosystem with more organized clustering
         research_pubs = publications.iloc[4:] if len(publications) > 4 else pd.DataFrame()
         np.random.seed(42)
         
+        # Create organized clusters instead of random scatter
+        cluster_centers = [(-0.5, 1), (0.5, 0.5), (1.5, -0.5), (0, -1.5)]
+        
         for i, (_, pub) in enumerate(research_pubs.iterrows()):
-            x_pos = np.random.uniform(-1, 3)
-            y_pos = np.random.uniform(-2, 2)
+            cluster_idx = i % len(cluster_centers)
+            center_x, center_y = cluster_centers[cluster_idx]
+            
+            # Add small random offset around cluster center
+            x_pos = center_x + np.random.normal(0, 0.4)
+            y_pos = center_y + np.random.normal(0, 0.4)
             node_positions[pub['node_id']] = (x_pos, y_pos)
         
-        # Position treatment pathway nodes (yellow circles)
+        # Position treatment pathway nodes (leading to treatment)
         treatment_pubs = publications.tail(3) if len(publications) >= 3 else publications.tail(len(publications))
+        treatment_pathway_ids = []
         for i, (_, pub) in enumerate(treatment_pubs.iterrows()):
-            y_pos = 0.8 - (i * 0.8)
-            node_positions[pub['node_id']] = (4, y_pos)
+            y_pos = 1 - (i * 1.0)  # Better spacing
+            node_positions[pub['node_id']] = (3.5, y_pos)
+            treatment_pathway_ids.append(pub['node_id'])
         
         # Position treatment (large green circle) on the right
+        treatment_node_id = None
         if len(treatments) > 0:
             treatment_node = treatments.iloc[0]
-            node_positions[treatment_node['node_id']] = (6, 0)
+            treatment_node_id = treatment_node['node_id']
+            node_positions[treatment_node_id] = (6, 0)
         
-        # Create clean edges
-        edge_x = []
-        edge_y = []
+        # Create improved edge traces with different styling
+        edge_traces = []
+        
+        # Separate edges by importance and type
+        grant_connected_edges = []
+        treatment_connected_edges = []
+        general_network_edges = []
         
         for _, edge in network_edges.iterrows():
-            if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
-                x0, y0 = node_positions[edge['source_id']]
-                x1, y1 = node_positions[edge['target_id']]
-                edge_x.extend([x0, x1, None])
-                edge_y.extend([y0, y1, None])
+            source_id = edge['source_id']
+            target_id = edge['target_id']
+            
+            # Categorize edges by importance
+            if source_id == grant_node_id or target_id == grant_node_id:
+                grant_connected_edges.append(edge)
+            elif source_id == treatment_node_id or target_id == treatment_node_id:
+                treatment_connected_edges.append(edge)
+            elif source_id in treatment_pathway_ids or target_id in treatment_pathway_ids:
+                treatment_connected_edges.append(edge)
+            else:
+                general_network_edges.append(edge)
         
-        edge_trace = go.Scatter(
-            x=edge_x, y=edge_y,
-            line=dict(width=2, color='#888', dash='solid'),
-            hoverinfo='none',
-            mode='lines',
-            showlegend=False,
-            opacity=0.6
-        )
+        # 1. General network edges (very transparent background)
+        if general_network_edges:
+            edge_x = []
+            edge_y = []
+            
+            for edge in general_network_edges:
+                if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
+                    x0, y0 = node_positions[edge['source_id']]
+                    x1, y1 = node_positions[edge['target_id']]
+                    edge_x.extend([x0, x1, None])
+                    edge_y.extend([y0, y1, None])
+            
+            if edge_x:
+                general_trace = go.Scatter(
+                    x=edge_x, y=edge_y,
+                    line=dict(width=1, color='rgba(200, 200, 200, 0.2)'),  # Very transparent
+                    hoverinfo='none',
+                    mode='lines',
+                    showlegend=False
+                )
+                edge_traces.append(general_trace)
         
-        # Create node traces with elegant styling
+        # 2. Treatment pathway edges (medium highlight)
+        if treatment_connected_edges:
+            edge_x = []
+            edge_y = []
+            
+            for edge in treatment_connected_edges:
+                if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
+                    x0, y0 = node_positions[edge['source_id']]
+                    x1, y1 = node_positions[edge['target_id']]
+                    edge_x.extend([x0, x1, None])
+                    edge_y.extend([y0, y1, None])
+            
+            if edge_x:
+                treatment_trace = go.Scatter(
+                    x=edge_x, y=edge_y,
+                    line=dict(width=2, color='rgba(251, 191, 36, 0.7)'),  # Yellow, semi-transparent
+                    hoverinfo='none',
+                    mode='lines',
+                    name='Treatment Pathway',
+                    showlegend=True
+                )
+                edge_traces.append(treatment_trace)
+        
+        # 3. Grant-connected edges (highly highlighted)
+        if grant_connected_edges:
+            edge_x = []
+            edge_y = []
+            
+            for edge in grant_connected_edges:
+                if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
+                    x0, y0 = node_positions[edge['source_id']]
+                    x1, y1 = node_positions[edge['target_id']]
+                    edge_x.extend([x0, x1, None])
+                    edge_y.extend([y0, y1, None])
+            
+            if edge_x:
+                grant_trace = go.Scatter(
+                    x=edge_x, y=edge_y,
+                    line=dict(width=4, color='rgba(31, 78, 121, 0.9)'),  # Blue, strong highlight
+                    hoverinfo='none',
+                    mode='lines',
+                    name='Grant Funding',
+                    showlegend=True
+                )
+                edge_traces.append(grant_trace)
+        
+        # Create node traces with improved styling
         node_traces = []
-        colors = {'grant': '#1f4e79', 'publication': '#d1d5db', 'treatment': '#059669'}
-        sizes = {'grant': 40, 'publication': 12, 'treatment': 35}
-        
-        # Identify treatment pathway nodes for special styling
-        treatment_pathway_nodes = treatment_pubs['node_id'].tolist() if len(treatment_pubs) > 0 else []
+        colors = {'grant': '#1f4e79', 'publication': '#e5e7eb', 'treatment': '#059669'}
+        sizes = {'grant': 45, 'publication': 14, 'treatment': 40}
         
         for node_type in ['grant', 'publication', 'treatment']:
             type_nodes = network_nodes[network_nodes['node_type'] == node_type]
@@ -171,20 +252,20 @@ def create_elegant_network(nodes_df, edges_df, network_id):
                         node_y.append(y)
                         
                         # Special styling for treatment pathway nodes
-                        if node['node_id'] in treatment_pathway_nodes:
+                        if node['node_id'] in treatment_pathway_ids:
                             node_colors.append('#fbbf24')  # Yellow
-                            node_sizes.append(18)
-                            text = "🟡 KEY RESEARCH<br>Treatment Pathway"
+                            node_sizes.append(20)
+                            text = "🟡 KEY RESEARCH<br>Treatment Pathway<br>" + str(node.get('pmid', node['node_id']))
                         else:
                             node_colors.append(colors[node_type])
                             node_sizes.append(sizes[node_type])
                             
                             if node_type == 'grant':
-                                text = "🔵 RESEARCH GRANT<br>Funding Source"
+                                text = "🔵 RESEARCH GRANT<br>Funding Source<br>" + str(node.get('grant_id', node['node_id']))
                             elif node_type == 'treatment':
-                                text = "🟢 BREAKTHROUGH TREATMENT<br>FDA Approved"
+                                text = "🟢 BREAKTHROUGH TREATMENT<br>FDA Approved<br>" + str(node.get('treatment_name', node['node_id']))
                             else:
-                                text = "⚪ RESEARCH PUBLICATION<br>Supporting Evidence"
+                                text = "⚪ RESEARCH PUBLICATION<br>Supporting Evidence<br>" + str(node.get('pmid', node['node_id']))
                         
                         node_text.append(text)
                 
@@ -219,32 +300,32 @@ def create_elegant_network(nodes_df, edges_df, network_id):
                                 marker=dict(
                                     size=trace_sizes,
                                     color=color,
-                                    line=dict(width=2, color='white'),
-                                    opacity=0.9
+                                    line=dict(width=3, color='white'),
+                                    opacity=0.95
                                 ),
                                 name=trace_name,
                                 showlegend=True
                             )
                             node_traces.append(node_trace)
         
-        # Create elegant figure
-        fig = go.Figure(data=[edge_trace] + node_traces)
+        # Create improved figure
+        fig = go.Figure(data=edge_traces + node_traces)
         
         fig.update_layout(
             title={
                 'text': "Research Impact Network",
                 'x': 0.5,
                 'xanchor': 'center',
-                'font': {'size': 20, 'color': '#1f4e79'}
+                'font': {'size': 24, 'color': '#1f4e79', 'family': 'Arial Black'}
             },
             showlegend=True,
             hovermode='closest',
-            margin=dict(b=40, l=40, r=40, t=60),
+            margin=dict(b=50, l=50, r=50, t=80),
             xaxis=dict(
                 showgrid=False, 
                 zeroline=False, 
                 showticklabels=False,
-                range=[-5, 7]
+                range=[-6, 7]
             ),
             yaxis=dict(
                 showgrid=False, 
@@ -252,17 +333,18 @@ def create_elegant_network(nodes_df, edges_df, network_id):
                 showticklabels=False,
                 range=[-3, 3]
             ),
-            height=600,
+            height=650,
             plot_bgcolor='white',
             paper_bgcolor='white',
             legend=dict(
                 yanchor="top",
-                y=0.99,
+                y=0.98,
                 xanchor="left",
-                x=0.01,
-                bgcolor="rgba(255,255,255,0.8)",
-                bordercolor="rgba(0,0,0,0.2)",
-                borderwidth=1
+                x=0.02,
+                bgcolor="rgba(255,255,255,0.9)",
+                bordercolor="rgba(0,0,0,0.1)",
+                borderwidth=1,
+                font=dict(size=12)
             )
         )
         
@@ -357,7 +439,7 @@ def main():
             
             st.markdown(treatment_card, unsafe_allow_html=True)
     
-    # Show elegant network if selection is made
+    # Show improved network if selection is made
     if selected_network_id:
         st.markdown("---")
         
@@ -384,19 +466,19 @@ def main():
         with col4:
             st.metric("Duration", str(network_info['research_duration']) + " years")
         
-        # Show elegant network
+        # Show improved network
         st.subheader("📊 Research Impact Network")
         
-        fig = create_elegant_network(nodes_df, edges_df, selected_network_id)
+        fig = create_improved_network(nodes_df, edges_df, selected_network_id)
         st.plotly_chart(fig, width='stretch')
         
-        # Network explanation
-        explanation = "**How to read this network:**\n"
-        explanation += "- 🔵 **Blue circle** = Research grant (funding source)\n"
-        explanation += "- ⚪ **Gray circles** = Research publications\n"
-        explanation += "- 🟡 **Yellow circles** = Key research leading to treatment\n"
-        explanation += "- 🟢 **Green circle** = Breakthrough treatment (FDA approved)\n"
-        explanation += "- **Lines** show research connections and funding flow"
+        # Enhanced network explanation
+        explanation = "**How to read this enhanced network:**\n"
+        explanation += "- 🔵 **Thick blue lines** = Direct grant funding (highlighted)\n"
+        explanation += "- 🟡 **Yellow lines** = Treatment development pathway\n"
+        explanation += "- **Light gray lines** = General research connections (background)\n"
+        explanation += "- **Node colors** = Grant (blue), Publications (gray), Key Research (yellow), Treatment (green)\n"
+        explanation += "- **Hover** over any node for detailed information"
         
         st.info(explanation)
         
@@ -451,7 +533,7 @@ def main():
         with col3:
             st.metric("Success Rate", "100%", help="All grants led to approved treatments")
         
-        st.info("👆 **Choose your exploration method above, then select a specific grant or treatment to see the elegant research network.**")
+        st.info("👆 **Choose your exploration method above, then select a specific grant or treatment to see the enhanced research network.**")
 
 if __name__ == "__main__":
     main()
