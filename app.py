@@ -2,9 +2,8 @@ import streamlit as st
 import pandas as pd
 import json
 from streamlit_agraph import agraph, Node, Edge, Config
-from pyvis.network import Network   # <-- NEW for export
+from pyvis.network import Network
 import tempfile, os
-
 
 # ... (keep all your existing code up to agraph(nodes, edges, config=config)) ...
 
