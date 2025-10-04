@@ -1,7 +1,7 @@
 """
-Research Impact Dashboard - Streamlit App (FIXED VERSION)
+Research Impact Dashboard - Streamlit App (SIMPLE VERSION)
+Reads all files from repository root (no data folder needed)
 Demonstrates how institutional funding leads to breakthrough treatments
-Perfect for stakeholder presentations and fundraising demonstrations
 """
 
 import streamlit as st
@@ -10,8 +10,8 @@ import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
 import networkx as nx
-from plotly.subplots import make_subplots
 import numpy as np
+import os
 
 # Page configuration
 st.set_page_config(
@@ -36,13 +36,6 @@ st.markdown("""
         border-radius: 0.5rem;
         border-left: 4px solid #1f77b4;
     }
-    .network-card {
-        background-color: #ffffff;
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin: 1rem 0;
-    }
     .success-metric {
         color: #28a745;
         font-weight: bold;
@@ -54,31 +47,38 @@ st.markdown("""
 # Data loading functions
 @st.cache_data
 def load_database():
-    """Load data from SQLite database or CSV fallback"""
+    """Load data from files in repository root"""
     try:
-        # Try SQLite first
-        conn = sqlite3.connect('data/streamlit_research_database.db')
-        nodes_df = pd.read_sql('SELECT * FROM nodes', conn)
-        edges_df = pd.read_sql('SELECT * FROM edges', conn)
-        summary_df = pd.read_sql('SELECT * FROM network_summary', conn)
-        conn.close()
+        # Try SQLite first (in root directory)
+        if os.path.exists('streamlit_research_database.db'):
+            conn = sqlite3.connect('streamlit_research_database.db')
+            nodes_df = pd.read_sql('SELECT * FROM nodes', conn)
+            edges_df = pd.read_sql('SELECT * FROM edges', conn)
+            summary_df = pd.read_sql('SELECT * FROM network_summary', conn)
+            conn.close()
+            st.success("✅ Loaded data from SQLite database")
+            return nodes_df, edges_df, summary_df
+        else:
+            st.info("SQLite database not found, trying CSV files...")
+    except Exception as e:
+        st.warning(f"SQLite error: {e}")
+    
+    try:
+        # Try CSV files (in root directory)
+        nodes_df = pd.read_csv('streamlit_nodes.csv')
+        edges_df = pd.read_csv('streamlit_edges.csv')
+        summary_df = pd.read_csv('streamlit_summary.csv')
+        st.success("✅ Loaded data from CSV files")
         return nodes_df, edges_df, summary_df
     except Exception as e:
-        st.warning(f"SQLite database not found, trying CSV files... ({e})")
-        try:
-            # Fallback to CSV files
-            nodes_df = pd.read_csv('data/streamlit_nodes.csv')
-            edges_df = pd.read_csv('data/streamlit_edges.csv')
-            summary_df = pd.read_csv('data/streamlit_summary.csv')
-            return nodes_df, edges_df, summary_df
-        except Exception as e2:
-            st.error(f"Could not load data from CSV files either: {e2}")
-            # Return sample data for demo
-            return create_sample_data()
+        st.warning(f"CSV error: {e}")
+    
+    # If all else fails, create sample data
+    st.info("📊 Using sample data for demonstration")
+    return create_sample_data()
 
 def create_sample_data():
     """Create sample data if files are not available"""
-    st.info("Using sample data for demonstration")
     
     # Sample summary data
     summary_df = pd.DataFrame({
@@ -135,109 +135,6 @@ def calculate_roi_metrics(summary_df, nodes_df):
         'success_rate': (total_treatments / len(summary_df)) * 100
     }
 
-def create_network_graph(nodes_df, edges_df, selected_network):
-    """Create interactive network visualization"""
-    try:
-        # Filter data for selected network
-        network_nodes = nodes_df[nodes_df['network_id'] == selected_network]
-        network_edges = edges_df[edges_df['network_id'] == selected_network]
-        
-        if len(network_nodes) == 0:
-            st.warning("No network data available for visualization")
-            return go.Figure()
-        
-        # Create NetworkX graph
-        G = nx.DiGraph()
-        
-        # Add nodes
-        for _, node in network_nodes.iterrows():
-            G.add_node(node['node_id'], **node.to_dict())
-        
-        # Add edges
-        for _, edge in network_edges.iterrows():
-            if edge['source_id'] in G.nodes() and edge['target_id'] in G.nodes():
-                G.add_edge(edge['source_id'], edge['target_id'], **edge.to_dict())
-        
-        if len(G.nodes()) == 0:
-            st.warning("No nodes available for network visualization")
-            return go.Figure()
-        
-        # Create layout
-        pos = nx.spring_layout(G, k=3, iterations=50)
-        
-        # Prepare data for Plotly
-        edge_x = []
-        edge_y = []
-        for edge in G.edges():
-            x0, y0 = pos[edge[0]]
-            x1, y1 = pos[edge[1]]
-            edge_x.extend([x0, x1, None])
-            edge_y.extend([y0, y1, None])
-        
-        # Create edge trace
-        edge_trace = go.Scatter(
-            x=edge_x, y=edge_y,
-            line=dict(width=0.5, color='#888'),
-            hoverinfo='none',
-            mode='lines'
-        )
-        
-        # Create node traces by type
-        node_traces = []
-        colors = {
-            'grant': '#1f77b4',
-            'publication': '#ff7f0e', 
-            'treatment': '#2ca02c'
-        }
-        
-        for node_type in ['grant', 'publication', 'treatment']:
-            type_nodes = network_nodes[network_nodes['node_type'] == node_type]
-            if len(type_nodes) > 0:
-                node_x = [pos[node_id][0] for node_id in type_nodes['node_id'] if node_id in pos]
-                node_y = [pos[node_id][1] for node_id in type_nodes['node_id'] if node_id in pos]
-                
-                if len(node_x) > 0:
-                    node_trace = go.Scatter(
-                        x=node_x, y=node_y,
-                        mode='markers',
-                        hoverinfo='text',
-                        text=[f"{row['node_type']}: {row.get('grant_id', row.get('pmid', row.get('treatment_name', 'Unknown')))}" 
-                              for _, row in type_nodes.iterrows() if row['node_id'] in pos],
-                        marker=dict(
-                            size=20 if node_type == 'grant' else 15 if node_type == 'treatment' else 10,
-                            color=colors[node_type],
-                            line=dict(width=2, color='white')
-                        ),
-                        name=node_type.title()
-                    )
-                    node_traces.append(node_trace)
-        
-        # Create figure
-        fig = go.Figure(data=[edge_trace] + node_traces,
-                       layout=go.Layout(
-                           title=f'Research Network {selected_network}',
-                           titlefont_size=16,
-                           showlegend=True,
-                           hovermode='closest',
-                           margin=dict(b=20,l=5,r=5,t=40),
-                           annotations=[ dict(
-                               text="Hover over nodes for details",
-                               showarrow=False,
-                               xref="paper", yref="paper",
-                               x=0.005, y=-0.002,
-                               xanchor="left", yanchor="bottom",
-                               font=dict(color="#888", size=12)
-                           )],
-                           xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                           yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
-                       ))
-        
-        return fig
-    
-    except Exception as e:
-        st.error(f"Error creating network graph: {e}")
-        return go.Figure()
-
 def create_timeline_chart(summary_df):
     """Create timeline visualization"""
     try:
@@ -290,6 +187,77 @@ def create_timeline_chart(summary_df):
         st.error(f"Error creating timeline chart: {e}")
         return go.Figure()
 
+def create_simple_network_chart(summary_df):
+    """Create a simple network visualization using summary data"""
+    try:
+        fig = go.Figure()
+        
+        # Create a simple flow chart showing grant -> treatment
+        for i, network in summary_df.iterrows():
+            y_pos = len(summary_df) - i
+            
+            # Grant node
+            fig.add_trace(go.Scatter(
+                x=[1],
+                y=[y_pos],
+                mode='markers+text',
+                marker=dict(size=30, color='blue'),
+                text=[f"Grant<br>${network['funding_amount']/1000000:.1f}M"],
+                textposition="middle center",
+                textfont=dict(color="white", size=10),
+                name=f"{network['disease']} Grant",
+                showlegend=False,
+                hovertemplate=f"<b>Grant: {network['grant_id']}</b><br>Funding: ${network['funding_amount']:,.0f}<br>Year: {network['grant_year']}<extra></extra>"
+            ))
+            
+            # Arrow
+            fig.add_annotation(
+                x=1.5, y=y_pos,
+                ax=1.3, ay=y_pos,
+                xref='x', yref='y',
+                axref='x', ayref='y',
+                arrowhead=2,
+                arrowsize=1,
+                arrowwidth=2,
+                arrowcolor='gray'
+            )
+            
+            # Treatment node
+            fig.add_trace(go.Scatter(
+                x=[2],
+                y=[y_pos],
+                mode='markers+text',
+                marker=dict(size=30, color='green'),
+                text=[f"Treatment<br>{network['research_duration']}yr"],
+                textposition="middle center",
+                textfont=dict(color="white", size=10),
+                name=f"{network['disease']} Treatment",
+                showlegend=False,
+                hovertemplate=f"<b>Treatment: {network['treatment_name']}</b><br>Approved: {network['approval_year']}<br>Duration: {network['research_duration']} years<extra></extra>"
+            ))
+            
+            # Disease label
+            fig.add_annotation(
+                x=0.5, y=y_pos,
+                text=f"<b>{network['disease']}</b>",
+                showarrow=False,
+                font=dict(size=12)
+            )
+        
+        fig.update_layout(
+            title="Research Impact Flow: Grant → Treatment",
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0, 2.5]),
+            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            height=300,
+            hovermode='closest'
+        )
+        
+        return fig
+    
+    except Exception as e:
+        st.error(f"Error creating network chart: {e}")
+        return go.Figure()
+
 def main():
     """Main Streamlit application"""
     
@@ -298,32 +266,17 @@ def main():
     st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">Demonstrating How Institutional Funding Creates Breakthrough Treatments</p>', unsafe_allow_html=True)
     
     # Load data
-    try:
-        nodes_df, edges_df, summary_df = load_database()
-        roi_metrics = calculate_roi_metrics(summary_df, nodes_df)
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        st.info("Please ensure the database files are in the 'data/' directory")
-        return
+    nodes_df, edges_df, summary_df = load_database()
+    roi_metrics = calculate_roi_metrics(summary_df, nodes_df)
     
     # Sidebar
     st.sidebar.title("🎯 Dashboard Controls")
-    
-    # Network selector
-    if len(summary_df) > 0:
-        selected_network = st.sidebar.selectbox(
-            "Select Research Network:",
-            options=summary_df['network_id'].tolist(),
-            format_func=lambda x: f"{summary_df[summary_df['network_id']==x]['disease'].iloc[0]} Research"
-        )
-    else:
-        selected_network = 1
     
     # Show/hide sections
     show_overview = st.sidebar.checkbox("📊 Overview Metrics", value=True)
     show_networks = st.sidebar.checkbox("🔬 Network Details", value=True)
     show_timeline = st.sidebar.checkbox("📅 Research Timeline", value=True)
-    show_visualization = st.sidebar.checkbox("🕸️ Network Graph", value=True)
+    show_flow = st.sidebar.checkbox("🔄 Research Flow", value=True)
     
     # Overview Metrics
     if show_overview:
@@ -411,31 +364,27 @@ def main():
     if show_timeline:
         st.header("📅 Research Timeline")
         timeline_fig = create_timeline_chart(summary_df)
-        st.plotly_chart(timeline_fig, width='stretch')  # FIXED: replaced use_container_width=True
+        st.plotly_chart(timeline_fig, width='stretch')
     
-    # Network Visualization
-    if show_visualization:
-        st.header("🕸️ Citation Network Visualization")
-        
-        network_fig = create_network_graph(nodes_df, edges_df, selected_network)
-        st.plotly_chart(network_fig, width='stretch')  # FIXED: replaced use_container_width=True
-        
-        # Network statistics
-        if len(nodes_df) > 0:
-            network_nodes = nodes_df[nodes_df['network_id'] == selected_network]
-            network_edges = edges_df[edges_df['network_id'] == selected_network]
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.metric("Network Nodes", len(network_nodes))
-            
-            with col2:
-                st.metric("Connections", len(network_edges))
-            
-            with col3:
-                publications = len(network_nodes[network_nodes['node_type'] == 'publication']) if 'node_type' in network_nodes.columns else 0
-                st.metric("Publications", publications)
+    # Research Flow Visualization
+    if show_flow:
+        st.header("🔄 Research Impact Flow")
+        flow_fig = create_simple_network_chart(summary_df)
+        st.plotly_chart(flow_fig, width='stretch')
+    
+    # Summary Table
+    st.header("📋 Research Networks Summary")
+    
+    # Create a nice summary table
+    display_df = summary_df.copy()
+    display_df['Funding'] = display_df['funding_amount'].apply(lambda x: f"${x:,.0f}")
+    display_df['Duration'] = display_df['research_duration'].apply(lambda x: f"{x} years")
+    display_df['Grant Period'] = display_df['grant_year'].astype(str) + " - " + display_df['approval_year'].astype(str)
+    
+    summary_table = display_df[['disease', 'treatment_name', 'grant_id', 'Funding', 'Duration', 'total_publications', 'Grant Period']]
+    summary_table.columns = ['Disease', 'Treatment', 'Grant ID', 'Funding', 'Duration', 'Publications', 'Period']
+    
+    st.dataframe(summary_table, width=800)
     
     # Footer
     st.markdown("---")
