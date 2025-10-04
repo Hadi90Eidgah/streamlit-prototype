@@ -1,6 +1,7 @@
 """
-Research Impact Dashboard - Ultra Simple Version
-No triple quotes, no f-strings, just simple Python
+Research Impact Dashboard - Single Choice Version
+Users first choose to explore by Grant OR Treatment, then make their selection
+Perfect for stakeholder presentations and fundraising demonstrations
 """
 
 import streamlit as st
@@ -25,6 +26,7 @@ st.markdown("""
 .selection-card { background-color: #f8f9fa; padding: 2rem; border-radius: 1rem; border: 2px solid #e9ecef; margin: 1rem 0; text-align: center; }
 .grant-card { border-left: 6px solid #007bff; }
 .treatment-card { border-left: 6px solid #28a745; }
+.choice-button { background-color: #007bff; color: white; padding: 1rem 2rem; border-radius: 0.5rem; border: none; font-size: 1.2rem; margin: 0.5rem; }
 .metric-highlight { font-size: 1.5rem; font-weight: bold; color: #495057; }
 .success-metric { color: #28a745; font-weight: bold; font-size: 1.2rem; }
 </style>
@@ -181,22 +183,35 @@ def main():
     
     # Header
     st.markdown('<h1 class="main-header">🔬 Research Impact Dashboard</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">Choose a Grant or Treatment to Explore the Citation Network</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">Explore Research Networks by Grant or Treatment</p>', unsafe_allow_html=True)
     
     # Load data
     nodes_df, edges_df, summary_df = load_database()
     
-    # Selection interface
-    st.header("🎯 Select Research to Explore")
+    # STEP 1: Choose exploration method
+    st.header("🎯 How would you like to explore the research?")
     
-    col1, col2 = st.columns(2)
+    # Radio button for selection method
+    exploration_method = st.radio(
+        "Choose your exploration method:",
+        options=["Select by Grant (Funding Source)", "Select by Treatment (Research Outcome)"],
+        index=0,
+        help="Choose whether to start from the funding source or the final treatment outcome"
+    )
     
-    with col1:
-        st.subheader("📋 Select by Grant")
+    st.markdown("---")
+    
+    # STEP 2: Show appropriate selection interface
+    selected_network_id = None
+    
+    if exploration_method == "Select by Grant (Funding Source)":
+        # Grant selection interface
+        st.header("📋 Select Research Grant")
+        st.write("Choose a research grant to see how funding led to breakthrough treatments:")
         
         grant_options = {}
         for _, row in summary_df.iterrows():
-            option_text = str(row['grant_id']) + " - " + str(row['disease'])
+            option_text = str(row['grant_id']) + " - " + str(row['disease']) + " Research"
             grant_options[option_text] = row['network_id']
         
         selected_grant = st.selectbox(
@@ -206,23 +221,29 @@ def main():
         )
         
         if selected_grant:
-            grant_info = summary_df[summary_df['network_id'] == grant_options[selected_grant]].iloc[0]
+            selected_network_id = grant_options[selected_grant]
+            grant_info = summary_df[summary_df['network_id'] == selected_network_id].iloc[0]
             
+            # Show grant information card
             grant_card = '<div class="selection-card grant-card">'
-            grant_card += '<h4>📋 ' + str(grant_info['grant_id']) + '</h4>'
-            grant_card += '<p><strong>Disease:</strong> ' + str(grant_info['disease']) + '</p>'
-            grant_card += '<p><strong>Funding:</strong> $' + "{:,.0f}".format(grant_info['funding_amount']) + '</p>'
-            grant_card += '<p><strong>Year:</strong> ' + str(grant_info['grant_year']) + '</p>'
+            grant_card += '<h3>📋 ' + str(grant_info['grant_id']) + '</h3>'
+            grant_card += '<p><strong>Disease Focus:</strong> ' + str(grant_info['disease']) + '</p>'
+            grant_card += '<p><strong>Funding Amount:</strong> $' + "{:,.0f}".format(grant_info['funding_amount']) + '</p>'
+            grant_card += '<p><strong>Grant Year:</strong> ' + str(grant_info['grant_year']) + '</p>'
+            grant_card += '<p><strong>Research Duration:</strong> ' + str(grant_info['research_duration']) + ' years</p>'
+            grant_card += '<p class="success-metric">✅ Led to FDA-approved treatment: ' + str(grant_info['treatment_name']) + '</p>'
             grant_card += '</div>'
             
             st.markdown(grant_card, unsafe_allow_html=True)
     
-    with col2:
-        st.subheader("🎯 Select by Treatment")
+    else:  # Select by Treatment
+        # Treatment selection interface
+        st.header("🎯 Select Breakthrough Treatment")
+        st.write("Choose a breakthrough treatment to see the research pathway that led to its development:")
         
         treatment_options = {}
         for _, row in summary_df.iterrows():
-            option_text = str(row['treatment_name']) + " - " + str(row['disease'])
+            option_text = str(row['treatment_name']) + " - " + str(row['disease']) + " Treatment"
             treatment_options[option_text] = row['network_id']
         
         selected_treatment = st.selectbox(
@@ -232,25 +253,22 @@ def main():
         )
         
         if selected_treatment:
-            treatment_info = summary_df[summary_df['network_id'] == treatment_options[selected_treatment]].iloc[0]
+            selected_network_id = treatment_options[selected_treatment]
+            treatment_info = summary_df[summary_df['network_id'] == selected_network_id].iloc[0]
             
+            # Show treatment information card
             treatment_card = '<div class="selection-card treatment-card">'
-            treatment_card += '<h4>🎯 ' + str(treatment_info['treatment_name']) + '</h4>'
-            treatment_card += '<p><strong>Disease:</strong> ' + str(treatment_info['disease']) + '</p>'
-            treatment_card += '<p><strong>Approved:</strong> ' + str(treatment_info['approval_year']) + '</p>'
-            treatment_card += '<p class="success-metric">✅ FDA Approved</p>'
+            treatment_card += '<h3>🎯 ' + str(treatment_info['treatment_name']) + '</h3>'
+            treatment_card += '<p><strong>Disease Treated:</strong> ' + str(treatment_info['disease']) + '</p>'
+            treatment_card += '<p><strong>FDA Approval Year:</strong> ' + str(treatment_info['approval_year']) + '</p>'
+            treatment_card += '<p><strong>Research Publications:</strong> ' + str(treatment_info['total_publications']) + ' papers</p>'
+            treatment_card += '<p><strong>Development Time:</strong> ' + str(treatment_info['research_duration']) + ' years</p>'
+            treatment_card += '<p class="success-metric">💰 Original Grant: ' + str(treatment_info['grant_id']) + ' ($' + "{:,.0f}".format(treatment_info['funding_amount']) + ')</p>'
             treatment_card += '</div>'
             
             st.markdown(treatment_card, unsafe_allow_html=True)
     
-    # Determine selected network
-    selected_network_id = None
-    if selected_grant and selected_grant in grant_options:
-        selected_network_id = grant_options[selected_grant]
-    elif selected_treatment and selected_treatment in treatment_options:
-        selected_network_id = treatment_options[selected_treatment]
-    
-    # Show network if selected
+    # STEP 3: Show citation network if selection is made
     if selected_network_id:
         st.markdown("---")
         
@@ -277,7 +295,7 @@ def main():
         with col4:
             st.metric("Duration", str(network_info['research_duration']) + " years")
         
-        # Show network
+        # Show network visualization
         st.subheader("📊 Interactive Citation Network")
         
         fig = create_simple_network(nodes_df, edges_df, selected_network_id)
@@ -285,42 +303,49 @@ def main():
         
         # Network explanation
         explanation = "**How to read this network:**\n"
-        explanation += "- 🔵 Blue nodes = Research grants\n"
-        explanation += "- 🔷 Teal nodes = Research publications\n"
-        explanation += "- 🟢 Green nodes = Breakthrough treatments\n"
-        explanation += "- Lines show research connections"
+        explanation += "- 🔵 **Blue nodes** = Research grants providing funding\n"
+        explanation += "- 🔷 **Teal nodes** = Research publications and papers\n"
+        explanation += "- 🟢 **Green nodes** = Breakthrough treatments\n"
+        explanation += "- **Lines** show citations and funding relationships\n"
+        explanation += "- **Hover** over nodes for detailed information"
         
         st.info(explanation)
         
-        # Impact summary
-        st.subheader("📈 Research Impact Summary")
+        # Research pathway summary
+        st.subheader("📈 Complete Research Impact Story")
         
         col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("**🔬 Research Journey:**")
-            st.write("Grant: " + str(network_info['grant_id']))
-            st.write("Funding: $" + "{:,.0f}".format(network_info['funding_amount']))
-            st.write("Publications: " + str(network_info['total_publications']))
-            st.write("Duration: " + str(network_info['research_duration']) + " years")
+            st.write("**Grant:** " + str(network_info['grant_id']) + " (" + str(network_info['grant_year']) + ")")
+            st.write("**Funding:** $" + "{:,.0f}".format(network_info['funding_amount']))
+            st.write("**Publications:** " + str(network_info['total_publications']) + " research papers")
+            st.write("**Research Duration:** " + str(network_info['research_duration']) + " years")
         
         with col2:
             st.markdown("**🎯 Breakthrough Outcome:**")
-            st.write("Treatment: " + str(network_info['treatment_name']))
-            st.write("Disease: " + str(network_info['disease']))
-            st.write("Approved: " + str(network_info['approval_year']))
-            st.write("Status: ✅ FDA Approved")
+            st.write("**Treatment:** " + str(network_info['treatment_name']))
+            st.write("**Disease:** " + str(network_info['disease']))
+            st.write("**FDA Approval:** " + str(network_info['approval_year']))
+            st.write("**Status:** ✅ Successfully Approved")
         
-        # ROI
+        # ROI calculation
         cost_per_pub = network_info['funding_amount'] / network_info['total_publications']
         roi_text = "This $" + "{:,.0f}".format(network_info['funding_amount']) + " grant "
         roi_text += "generated " + str(network_info['total_publications']) + " publications "
+        roi_text += "($" + "{:,.0f}".format(cost_per_pub) + " per publication) "
         roi_text += "and led to FDA approval in " + str(network_info['research_duration']) + " years."
         
         st.success("💰 **Return on Investment:** " + roi_text)
+        
+        # Call to action
+        st.markdown("---")
+        cta_text = "**🎯 This demonstrates how institutional funding directly creates breakthrough treatments!**"
+        st.markdown('<p style="text-align: center; font-size: 1.3rem; color: #28a745; font-weight: bold;">' + cta_text + '</p>', unsafe_allow_html=True)
     
     else:
-        # Overall summary
+        # Show overall summary when no selection is made
         st.markdown("---")
         st.header("📊 Overall Research Impact")
         
@@ -335,9 +360,9 @@ def main():
             st.metric("Total Publications", "{:,}".format(total_pubs))
         
         with col3:
-            st.metric("Success Rate", "100%")
+            st.metric("Success Rate", "100%", help="All grants led to approved treatments")
         
-        st.info("👆 Select a grant or treatment above to explore the detailed citation network.")
+        st.info("👆 **Choose your exploration method above, then select a specific grant or treatment to see the detailed citation network.**")
 
 if __name__ == "__main__":
     main()
