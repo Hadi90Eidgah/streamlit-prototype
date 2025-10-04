@@ -236,25 +236,27 @@ def create_network_graph(nodes_df, edges_df):
     )
     
     # Create figure
-    fig = go.Figure(data=[edge_trace, node_trace],
-                    layout=go.Layout(
-                        title='Research Grant to Treatment Lineage',
-                        titlefont_size=16,
-                        showlegend=False,
-                        hovermode='closest',
-                        margin=dict(b=20,l=5,r=5,t=40),
-                        annotations=[ dict(
-                            text="Click on nodes to see details. Hover for quick information.",
-                            showarrow=False,
-                            xref="paper", yref="paper",
-                            x=0.005, y=-0.002,
-                            xanchor='left', yanchor='bottom',
-                            font=dict(color='#888', size=12)
-                        )],
-                        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                        plot_bgcolor='white'
-                    ))
+    fig = go.Figure(data=[edge_trace, node_trace])
+    
+    # Update layout separately to avoid compatibility issues
+    fig.update_layout(
+        title='Research Grant to Treatment Lineage',
+        title_font_size=16,
+        showlegend=False,
+        hovermode='closest',
+        margin=dict(b=20,l=5,r=5,t=40),
+        annotations=[dict(
+            text="Click on nodes to see details. Hover for quick information.",
+            showarrow=False,
+            xref="paper", yref="paper",
+            x=0.005, y=-0.002,
+            xanchor='left', yanchor='bottom',
+            font=dict(color='#888', size=12)
+        )],
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        plot_bgcolor='white'
+    )
     
     return fig
 
