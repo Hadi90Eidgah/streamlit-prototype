@@ -196,12 +196,56 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                 )
                 edge_traces.append(grant_trace)
         
-        # 2. Treatment pathway edges (orange, thick)
+        # 2. Treatment pathway edges (orange, thick) - Only complete pathways
         treatment_pathway_edges = network_edges[network_edges['edge_type'] == 'leads_to_treatment']
+        citation_edges = network_edges[network_edges['edge_type'] == 'cites']
+        
+        # Find complete pathways: Treatment → Ecosystem → Grant
+        complete_pathway_edges = []
+        
         if len(treatment_pathway_edges) > 0:
+            # Get all treatment papers
+            treatment_papers = [n for n in network_nodes if n['node_id'].startswith('TREAT_PUB_')]
+            grant_papers = [n for n in network_nodes if n['node_id'].startswith('PUB_')]
+            
+            for treatment_paper in treatment_papers:
+                treatment_id = treatment_paper['node_id']
+                
+                # Find ecosystem papers this treatment cites
+                treatment_to_eco = treatment_pathway_edges[
+                    (treatment_pathway_edges['source_id'] == treatment_id) & 
+                    (treatment_pathway_edges['target_id'].str.startswith('ECO_'))
+                ]
+                
+                for _, t_to_e_edge in treatment_to_eco.iterrows():
+                    eco_id = t_to_e_edge['target_id']
+                    
+                    # Check if this ecosystem paper cites any grant papers
+                    eco_to_grant = citation_edges[
+                        (citation_edges['source_id'] == eco_id) & 
+                        (citation_edges['target_id'].str.startswith('PUB_'))
+                    ]
+                    
+                    if len(eco_to_grant) > 0:
+                        # This is a complete pathway - highlight both edges
+                        complete_pathway_edges.append(t_to_e_edge)
+                        # Also add the ecosystem to grant edges
+                        for _, e_to_g_edge in eco_to_grant.iterrows():
+                            complete_pathway_edges.append(e_to_g_edge)
+            
+            # Also include any direct treatment → grant connections (rare)
+            direct_treatment_to_grant = treatment_pathway_edges[
+                (treatment_pathway_edges['source_id'].str.startswith('TREAT_PUB_')) & 
+                (treatment_pathway_edges['target_id'].str.startswith('PUB_'))
+            ]
+            for _, edge in direct_treatment_to_grant.iterrows():
+                complete_pathway_edges.append(edge)
+        
+        # Draw only the complete pathway edges in orange
+        if complete_pathway_edges:
             edge_x, edge_y = [], []
             
-            for _, edge in treatment_pathway_edges.iterrows():
+            for edge in complete_pathway_edges:
                 source_id = edge['source_id']
                 target_id = edge['target_id']
                 
@@ -217,18 +261,31 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     line=dict(width=4, color='rgba(255, 165, 0, 0.9)'),
                     hoverinfo='none',
                     mode='lines',
-                    name='Treatment Impact Pathway',
+                    name='Complete Research Impact Pathway',
                     showlegend=True
                 )
                 edge_traces.append(treatment_trace)
         
-        # 3. General citation edges (gray, transparent)
-        citation_edges = network_edges[network_edges['edge_type'] == 'cites']
-        if len(citation_edges) > 0:
+        # 3. General citation edges (gray, transparent) - Exclude highlighted pathways
+        all_citation_edges = network_edges[network_edges['edge_type'] == 'cites']
+        remaining_treatment_edges = network_edges[network_edges['edge_type'] == 'leads_to_treatment']
+        
+        # Create set of highlighted edge IDs to exclude
+        highlighted_edge_ids = set()
+        if complete_pathway_edges:
+            for edge in complete_pathway_edges:
+                edge_id = f"{edge['source_id']}→{edge['target_id']}"
+                highlighted_edge_ids.add(edge_id)
+        
+        # Draw remaining citation edges in gray
+        if len(all_citation_edges) > 0:
             edge_x, edge_y = [], []
             
-            for _, edge in citation_edges.iterrows():
-                if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
+            for _, edge in all_citation_edges.iterrows():
+                edge_id = f"{edge['source_id']}→{edge['target_id']}"
+                if (edge_id not in highlighted_edge_ids and 
+                    edge['source_id'] in node_positions and 
+                    edge['target_id'] in node_positions):
                     x0, y0 = node_positions[edge['source_id']]
                     x1, y1 = node_positions[edge['target_id']]
                     edge_x.extend([x0, x1, None])
@@ -243,6 +300,30 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     showlegend=False
                 )
                 edge_traces.append(citation_trace)
+        
+        # Draw remaining treatment edges that don't complete pathways in gray
+        if len(remaining_treatment_edges) > 0:
+            edge_x, edge_y = [], []
+            
+            for _, edge in remaining_treatment_edges.iterrows():
+                edge_id = f"{edge['source_id']}→{edge['target_id']}"
+                if (edge_id not in highlighted_edge_ids and 
+                    edge['source_id'] in node_positions and 
+                    edge['target_id'] in node_positions):
+                    x0, y0 = node_positions[edge['source_id']]
+                    x1, y1 = node_positions[edge['target_id']]
+                    edge_x.extend([x0, x1, None])
+                    edge_y.extend([y0, y1, None])
+            
+            if edge_x:
+                incomplete_trace = go.Scatter(
+                    x=edge_x, y=edge_y,
+                    line=dict(width=2, color='rgba(200, 200, 200, 0.4)'),
+                    hoverinfo='none',
+                    mode='lines',
+                    showlegend=False
+                )
+                edge_traces.append(incomplete_trace)
         
         # 4. Treatment enablement edges (green, medium)
         enablement_edges = network_edges[network_edges['edge_type'] == 'enables_treatment']
