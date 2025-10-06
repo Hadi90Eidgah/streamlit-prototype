@@ -248,3 +248,16 @@ button[data-testid="baseButton-secondary"]:hover {
     background-color: #4299e1 !important;
     color: #ffffff !important;
 }
+
+/* Strong override for metric text colors */
+div[data-testid="stMetricValue"] {
+    color: #c6f6d5 !important; /* bright mint for contrast */
+}
+
+div[data-testid="stMetricLabel"] {
+    color: #e2e8f0 !important; /* near-white labels */
+}
+
+div[data-testid="stMetricDelta"] {
+    color: #81e6d9 !important; /* teal accent for delta text */
+}
