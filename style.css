@@ -155,6 +155,10 @@
     color: #ffffff !important;  /* Hover text color */
     background-color: #4299e1 !important;  /* Hover background color */
 }
+.stSelectbox label {
+    color: #ff6b6b !important;  /* Red */
+    font-weight: bold !important;
+}
 
 /* Info box styling */
 .stInfo {
