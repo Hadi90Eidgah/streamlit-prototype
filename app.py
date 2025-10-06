@@ -286,7 +286,7 @@ def main():
                             <div class="treatment-name">{network['treatment_name']}</div>
                             <div class="network-details">Grant ID: {network['grant_id']}<br>Duration: {network['research_duration']} years</div>
                         </div>""", unsafe_allow_html=True)
-                        if st.button(f"Analyze Network {network['network_id']}", key=f"btn_{network['network_id']}", use_container_width=True):
+                        if st.button(f"Analyze Citation Network", key=f"btn_{network['network_id']}", use_container_width=True):
                             selected_network = network['network_id']
         else:
             st.info("No networks found for the selected criteria.")
