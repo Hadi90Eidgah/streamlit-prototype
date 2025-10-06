@@ -18,7 +18,7 @@ EDGE_TYPE_ENABLES_TREATMENT = 'enables_treatment'
 
 # --- Visualization Colors ---
 NODE_COLORS = {
-    'grant': '#4299e1',                # Blue
+    'grant': '#a0aec0',                # Blue
     'publication': '#a0aec0',          # Gray
     'treatment': '#38b2ac',            # Teal
     'grant_funded_pub': '#718096',     # Muted gray-blue
