@@ -572,29 +572,92 @@ def main():
             st.error("No data available. Please check your database files.")
             return
         
-        # Network selection
+        # Enhanced Network Selection with Search
         st.markdown("## 🎯 Select Research Network")
         
-        # Create network selection cards
-        cols = st.columns(3)
+        # Search functionality
+        st.markdown("### 🔍 Search Networks")
         
-        selected_network = None
+        col1, col2 = st.columns([1, 2])
         
-        for i, (_, network) in enumerate(summary_df.iterrows()):
-            with cols[i]:
-                with st.container():
-                    st.markdown(f"""
-                    <div class="selection-card grant-card">
-                        <h3>🏥 {network['disease']}</h3>
-                        <p><strong>{network['treatment_name']}</strong></p>
-                        <p>Grant: {network['grant_id']}</p>
-                        <p>Duration: {network['research_duration']} years</p>
-                        <p>Funding: ${network['funding_amount']:,.0f}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    if st.button(f"Explore Network {network['network_id']}", key=f"btn_{network['network_id']}"):
-                        selected_network = network['network_id']
+        with col1:
+            search_type = st.selectbox(
+                "Search by:",
+                ["Disease", "Treatment", "Grant"],
+                key="search_type"
+            )
+        
+        with col2:
+            if search_type == "Disease":
+                search_options = summary_df['disease'].tolist()
+                search_placeholder = "Select a disease..."
+            elif search_type == "Treatment":
+                search_options = summary_df['treatment_name'].tolist()
+                search_placeholder = "Select a treatment..."
+            else:  # Grant
+                search_options = summary_df['grant_id'].tolist()
+                search_placeholder = "Select a grant..."
+            
+            selected_search = st.selectbox(
+                f"Select {search_type.lower()}:",
+                [""] + search_options,
+                key="search_selection",
+                format_func=lambda x: search_placeholder if x == "" else x
+            )
+        
+        # Filter networks based on search
+        if selected_search and selected_search != "":
+            if search_type == "Disease":
+                filtered_networks = summary_df[summary_df['disease'] == selected_search]
+            elif search_type == "Treatment":
+                filtered_networks = summary_df[summary_df['treatment_name'] == selected_search]
+            else:  # Grant
+                filtered_networks = summary_df[summary_df['grant_id'] == selected_search]
+        else:
+            filtered_networks = summary_df
+        
+        # Display filtered network cards
+        if len(filtered_networks) > 0:
+            st.markdown("### 📋 Available Networks")
+            
+            # Create columns based on number of filtered networks
+            num_networks = len(filtered_networks)
+            if num_networks == 1:
+                cols = [st.columns(1)[0]]
+            elif num_networks == 2:
+                cols = st.columns(2)
+            else:
+                cols = st.columns(3)
+            
+            selected_network = None
+            
+            for i, (_, network) in enumerate(filtered_networks.iterrows()):
+                col_index = i if i < len(cols) else i % len(cols)
+                with cols[col_index]:
+                    with st.container():
+                        # Highlight the matching search criteria
+                        if search_type == "Disease":
+                            highlight_text = f"🎯 {network['disease']}"
+                        elif search_type == "Treatment":
+                            highlight_text = f"🎯 {network['treatment_name']}"
+                        else:
+                            highlight_text = f"🎯 {network['grant_id']}"
+                        
+                        st.markdown(f"""
+                        <div class="selection-card grant-card">
+                            <h3>🏥 {network['disease']}</h3>
+                            <p><strong>{network['treatment_name']}</strong></p>
+                            <p>Grant: {network['grant_id']}</p>
+                            <p>Duration: {network['research_duration']} years</p>
+                            <p>Funding: ${network['funding_amount']:,.0f}</p>
+                            <p style="color: #ff6b35; font-weight: bold;">{highlight_text}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        if st.button(f"Explore Network {network['network_id']}", key=f"btn_{network['network_id']}"):
+                            selected_network = network['network_id']
+        else:
+            st.info("🔍 Use the search options above to find and explore research networks.")
         
         # Use session state to maintain selection
         if 'selected_network' not in st.session_state:
