@@ -204,7 +204,7 @@ def create_network_visualization(nodes_df, edges_df, network_id, grant_id=None, 
     node_traces = [
         create_node_trace(network_nodes[network_nodes['node_type'] == NODE_TYPE_GRANT], node_positions, NODE_TYPE_GRANT, 'Grant', 'Research Grant<br>Funding Source', True),
         create_node_trace(network_nodes[network_nodes['node_id'].str.startswith('PUB_')], node_positions, 'grant_funded_pub', 'Grant-Funded Papers', 'Grant-Funded Paper', True),
-        create_node_trace(network_nodes[network_nodes['node_id'].str.startswith('TREAT_PUB_')], node_positions, 'treatment_pathway_pub', 'Treatment Pathway Papers', 'Treatment Development Paper', True),
+        create_node_trace(network_nodes[network_nodes['node_id'].str.startswith('TREAT_PUB_')], node_positions, 'treatment_pathway_pub', 'Treatment Approval Papers', 'Treatment Development Paper', True),
         create_node_trace(network_nodes[network_nodes['node_id'].str.startswith('ECO_')], node_positions, 'ecosystem_pub', 'Research Ecosystem', 'Research Ecosystem<br>Supporting Literature', True),
         create_node_trace(network_nodes[network_nodes['node_type'] == NODE_TYPE_TREATMENT], node_positions, NODE_TYPE_TREATMENT, 'Approved Treatment', 'Approved Treatment<br>Clinical Application', True),
     ]
