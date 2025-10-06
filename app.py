@@ -232,7 +232,7 @@ def main():
         st.error("No data available. Please check your database files.")
         return
 
-    st.markdown("## Network Selection")
+    st.markdown("## Select the Citation Network")
     
     # Compact search controls
     with st.container():
