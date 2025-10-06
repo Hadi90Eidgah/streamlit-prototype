@@ -224,13 +224,6 @@ def main():
     # Load data
     nodes_df, edges_df, summary_df = load_database()
 
-    # Simple refresh button
-    col1, col2, col3 = st.columns([1, 1, 8])
-    with col2:
-        if st.button("🔄 Refresh Data", help="Refresh database if needed"):
-            st.cache_data.clear()
-            st.rerun()
-
     st.sidebar.markdown("### Database Statistics")
     st.sidebar.write(f"Total connections: {len(edges_df)}")
     st.sidebar.write(f"Treatment pathways: {len(edges_df[edges_df['edge_type'] == EDGE_TYPE_LEADS_TO_TREATMENT])}")

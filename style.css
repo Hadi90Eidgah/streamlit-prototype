@@ -125,13 +125,6 @@
     border-radius: 8px;
 }
 
-/* Refresh button styling */
-.refresh-button {
-    display: flex;
-    justify-content: center;
-    margin: 1rem 0;
-}
-
 /* Unified Button Styling - All buttons consistent with dark theme */
 .stButton > button,
 button[data-testid="baseButton-primary"],
