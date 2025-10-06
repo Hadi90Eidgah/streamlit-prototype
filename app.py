@@ -246,8 +246,13 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             edge_x, edge_y = [], []
             
             for edge in complete_pathway_edges:
-                source_id = edge['source_id']
-                target_id = edge['target_id']
+                # Handle both pandas Series and dict objects
+                if hasattr(edge, 'iloc'):  # pandas Series
+                    source_id = edge['source_id']
+                    target_id = edge['target_id']
+                else:  # dict
+                    source_id = edge['source_id']
+                    target_id = edge['target_id']
                 
                 if source_id in node_positions and target_id in node_positions:
                     x0, y0 = node_positions[source_id]
@@ -274,7 +279,14 @@ def create_network_visualization(nodes_df, edges_df, network_id):
         highlighted_edge_ids = set()
         if complete_pathway_edges:
             for edge in complete_pathway_edges:
-                edge_id = f"{edge['source_id']}→{edge['target_id']}"
+                # Handle both pandas Series and dict objects
+                if hasattr(edge, 'iloc'):  # pandas Series
+                    source_id = edge['source_id']
+                    target_id = edge['target_id']
+                else:  # dict
+                    source_id = edge['source_id']
+                    target_id = edge['target_id']
+                edge_id = f"{source_id}→{target_id}"
                 highlighted_edge_ids.add(edge_id)
         
         # Draw remaining citation edges in gray
