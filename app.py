@@ -19,13 +19,16 @@ st.set_page_config(
 # --- Load External CSS ---
 def load_css(file_name):
     """Load CSS and re-inject after render to override Streamlit theming."""
+    import time
+
+    # Read the CSS file
     with open(file_name) as f:
         css = f.read()
 
-    # Inject CSS once
+    # Inject CSS initially
     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
-    # Re-inject after render (ensures override on Streamlit Cloud)
+    # Re-inject CSS after Streamlit finishes rendering (for Streamlit Cloud overrides)
     st.markdown(
         f"""
         <script>
@@ -39,7 +42,8 @@ def load_css(file_name):
         </script>
         """,
         unsafe_allow_html=True
-    )   st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    )
+
 
 load_css('style.css')
 
