@@ -17,40 +17,141 @@ st.set_page_config(
     layout="wide"
 )
 
-# CSS styling
+# Scientific Dark Theme CSS
 st.markdown("""
 <style>
+/* Global dark theme */
+.stApp {
+    background-color: #0e1117;
+    color: #fafafa;
+}
+
+/* Main header styling */
 .main-header { 
-    font-size: 3rem; 
-    color: #1f77b4; 
+    font-size: 2.5rem; 
+    color: #ffffff; 
     text-align: center; 
-    margin-bottom: 2rem; 
+    margin-bottom: 2rem;
+    font-weight: 300;
+    letter-spacing: 1px;
 }
+
+/* Elegant network selection cards */
 .selection-card { 
-    background-color: #f8f9fa; 
-    padding: 2rem; 
-    border-radius: 1rem; 
-    border: 2px solid #e9ecef; 
+    background: linear-gradient(135deg, #1e2329 0%, #2d3748 100%);
+    padding: 1.8rem; 
+    border-radius: 12px; 
+    border: 1px solid #4a5568; 
     margin: 1rem 0; 
-    text-align: center; 
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
+
+.selection-card:hover {
+    border-color: #63b3ed;
+    box-shadow: 0 6px 20px rgba(99, 179, 237, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Network card styling */
 .grant-card { 
-    border-left: 6px solid #007bff; 
+    border-left: 3px solid #4299e1; 
 }
-.treatment-card { 
-    border-left: 6px solid #28a745; 
+
+/* Scientific typography */
+.network-title {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #e2e8f0;
+    margin-bottom: 0.5rem;
 }
-.success-metric { 
-    color: #28a745; 
-    font-weight: bold; 
-    font-size: 1.2rem; 
+
+.treatment-name {
+    font-size: 1.1rem;
+    color: #90cdf4;
+    font-weight: 400;
+    margin-bottom: 1rem;
 }
+
+.network-details {
+    font-size: 0.9rem;
+    color: #a0aec0;
+    line-height: 1.6;
+}
+
+/* Metrics styling */
+.metric-container {
+    background: rgba(45, 55, 72, 0.6);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #4a5568;
+}
+
+/* Search section styling */
+.search-section {
+    background: rgba(30, 35, 41, 0.8);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #4a5568;
+    margin-bottom: 2rem;
+}
+
+/* Button styling */
+.stButton > button {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+/* Sidebar styling */
+.css-1d391kg {
+    background-color: #1a202c;
+}
+
+/* Remove default streamlit styling */
+.css-1v0mbdj {
+    border: none;
+}
+
+/* Network info styling */
 .network-info { 
-    background-color: #f0f8ff; 
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
     padding: 1.5rem; 
     border-radius: 0.8rem; 
-    border: 1px solid #b0d4f1; 
+    border-radius: 10px; 
+    border: 1px solid #4a5568; 
     margin: 1rem 0; 
+}
+
+/* Selectbox styling */
+.stSelectbox > div > div {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+}
+
+/* Info box styling */
+.stInfo {
+    background-color: rgba(66, 153, 225, 0.1);
+    border: 1px solid #4299e1;
+    border-radius: 8px;
+}
+
+/* Success box styling */
+.stSuccess {
+    background-color: rgba(72, 187, 120, 0.1);
+    border: 1px solid #48bb78;
+    border-radius: 8px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -188,7 +289,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             if edge_x:
                 grant_trace = go.Scatter(
                     x=edge_x, y=edge_y,
-                    line=dict(width=4, color='rgba(31, 78, 121, 0.9)'),
+                    line=dict(width=3, color='rgba(74, 85, 104, 0.8)'),
                     hoverinfo='none',
                     mode='lines',
                     name='Grant Funding',
@@ -261,10 +362,10 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             if edge_x:
                 treatment_trace = go.Scatter(
                     x=edge_x, y=edge_y,
-                    line=dict(width=4, color='rgba(255, 165, 0, 0.9)'),
+                    line=dict(width=3, color='rgba(99, 179, 237, 0.9)'),
                     hoverinfo='none',
                     mode='lines',
-                    name='Complete Research Impact Pathway',
+                    name='Research Impact Pathway',
                     showlegend=True
                 )
                 edge_traces.append(treatment_trace)
@@ -293,7 +394,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             if edge_x:
                 citation_trace = go.Scatter(
                     x=edge_x, y=edge_y,
-                    line=dict(width=1, color='rgba(200, 200, 200, 0.3)'),
+                    line=dict(width=0.8, color='rgba(160, 174, 192, 0.25)'),
                     hoverinfo='none',
                     mode='lines',
                     showlegend=False
@@ -360,7 +461,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                 mode='markers',
                 hoverinfo='text',
                 text=["Research Grant<br>Funding Source"],
-                marker=dict(size=45, color='#1f4e79', line=dict(width=3, color='white')),
+                marker=dict(size=40, color='#4a5568', line=dict(width=2, color='#e2e8f0')),
                 name='Research Grant',
                 showlegend=True
             )
@@ -377,13 +478,13 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     mode='markers',
                     hoverinfo='text',
                     text=["Grant-Funded Research<br>Direct Impact"] * len(pub_x),
-                    marker=dict(size=20, color='#e5e7eb', line=dict(width=2, color='white')),
+                    marker=dict(size=18, color='#a0aec0', line=dict(width=1, color='#e2e8f0')),
                     name='Grant-Funded Research',
                     showlegend=True
                 )
                 node_traces.append(funded_pub_trace)
         
-        # Treatment pathway nodes (orange)
+        # Treatment pathway nodes (blue accent)
         if treatment_pathway_pubs:
             treat_x = [node_positions[pub_id][0] for pub_id in treatment_pathway_pubs if pub_id in node_positions]
             treat_y = [node_positions[pub_id][1] for pub_id in treatment_pathway_pubs if pub_id in node_positions]
@@ -393,8 +494,8 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     x=treat_x, y=treat_y,
                     mode='markers',
                     hoverinfo='text',
-                    text=["Treatment Development<br>Cites Grant Research"] * len(treat_x),
-                    marker=dict(size=25, color='#ffa500', line=dict(width=3, color='white')),
+                    text=["Treatment Development<br>Research Papers"] * len(treat_x),
+                    marker=dict(size=22, color='#90cdf4', line=dict(width=2, color='#e2e8f0')),
                     name='Treatment Development',
                     showlegend=True
                 )
@@ -410,14 +511,14 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     x=eco_x, y=eco_y,
                     mode='markers',
                     hoverinfo='text',
-                    text=["Research Ecosystem<br>Citing Grant Work"] * len(eco_x),
-                    marker=dict(size=12, color='#f3f4f6', line=dict(width=1, color='white')),
+                    text=["Research Ecosystem<br>Supporting Literature"] * len(eco_x),
+                    marker=dict(size=8, color='#718096', line=dict(width=0.5, color='#a0aec0')),
                     name='Research Ecosystem',
                     showlegend=True
                 )
                 node_traces.append(eco_trace)
         
-        # Treatment nodes (green)
+        # Treatment nodes (teal accent)
         if len(treatments) > 0:
             treatment_x = [node_positions[treatments.iloc[0]['node_id']][0]]
             treatment_y = [node_positions[treatments.iloc[0]['node_id']][1]]
@@ -426,9 +527,9 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                 x=treatment_x, y=treatment_y,
                 mode='markers',
                 hoverinfo='text',
-                text=["Breakthrough Treatment<br>FDA Approved"],
-                marker=dict(size=40, color='#059669', line=dict(width=3, color='white')),
-                name='Breakthrough Treatment',
+                text=["Approved Treatment<br>Clinical Application"],
+                marker=dict(size=35, color='#38b2ac', line=dict(width=2, color='#e2e8f0')),
+                name='Approved Treatment',
                 showlegend=True
             )
             node_traces.append(treatment_trace)
@@ -441,20 +542,21 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                 'text': f"Research Impact Network - Network {network_id}",
                 'x': 0.5,
                 'xanchor': 'center',
-                'font': {'size': 24, 'color': '#1f4e79', 'family': 'Arial Black'}
+                'font': {'size': 20, 'color': '#e2e8f0', 'family': 'Inter, sans-serif'}
             },
             showlegend=True,
             hovermode='closest',
-            margin=dict(b=50, l=50, r=50, t=80),
+            margin=dict(b=40, l=40, r=40, t=70),
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-6, 7]),
             yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-3, 3]),
-            height=650,
-            plot_bgcolor='white',
-            paper_bgcolor='white',
+            height=600,
+            plot_bgcolor='rgba(14, 17, 23, 0)',
+            paper_bgcolor='rgba(14, 17, 23, 0)',
+            font=dict(color='#e2e8f0'),
             legend=dict(
                 yanchor="top", y=0.98, xanchor="left", x=0.02,
-                bgcolor="rgba(255,255,255,0.9)", bordercolor="rgba(0,0,0,0.1)",
-                borderwidth=1, font=dict(size=12)
+                bgcolor="rgba(45, 55, 72, 0.9)", bordercolor="rgba(74, 85, 104, 0.5)",
+                borderwidth=1, font=dict(size=11, color='#e2e8f0')
             )
         )
         
@@ -474,37 +576,38 @@ def display_network_metrics(summary_df, edges_df, network_id):
         
         with col1:
             st.metric(
-                label="💰 Grant Funding",
-                value=f"${network_summary['funding_amount']:,.0f}",
-                delta=f"Started {network_summary['grant_year']}"
-            )
-        
-        with col2:
-            st.metric(
-                label="📄 Publications",
+                label="Publications",
                 value=f"{network_summary['total_publications']}",
                 delta="Research papers"
             )
         
-        with col3:
+        with col2:
             st.metric(
-                label="⏱️ Research Duration",
+                label="Research Duration",
                 value=f"{network_summary['research_duration']} years",
                 delta=f"Approved {network_summary['approval_year']}"
             )
         
-        with col4:
+        with col3:
             treatment_connections = len(network_edges[network_edges['edge_type'] == 'leads_to_treatment'])
             st.metric(
-                label="🔗 Treatment Connections",
+                label="Treatment Pathways",
                 value=f"{treatment_connections}",
-                delta="Critical pathways"
+                delta="Impact connections"
+            )
+        
+        with col4:
+            total_connections = len(network_edges)
+            st.metric(
+                label="Total Connections",
+                value=f"{total_connections}",
+                delta="Network edges"
             )
         
         # Edge type breakdown
         edge_counts = network_edges['edge_type'].value_counts()
         
-        st.markdown("### 📊 Network Connection Analysis")
+        st.markdown("### Network Analysis")
         
         col1, col2 = st.columns(2)
         
@@ -512,11 +615,11 @@ def display_network_metrics(summary_df, edges_df, network_id):
             st.markdown("**Connection Types:**")
             for edge_type, count in edge_counts.items():
                 if edge_type == 'leads_to_treatment':
-                    st.markdown(f"- **{edge_type}**: {count} (🎯 Critical pathway)")
+                    st.markdown(f"- **{edge_type}**: {count} (Impact pathway)")
                 elif edge_type == 'funded_by':
-                    st.markdown(f"- **{edge_type}**: {count} (💰 Direct funding)")
+                    st.markdown(f"- **{edge_type}**: {count} (Direct funding)")
                 elif edge_type == 'enables_treatment':
-                    st.markdown(f"- **{edge_type}**: {count} (🚀 Treatment development)")
+                    st.markdown(f"- **{edge_type}**: {count} (Treatment development)")
                 else:
                     st.markdown(f"- **{edge_type}**: {count}")
         
@@ -527,9 +630,9 @@ def display_network_metrics(summary_df, edges_df, network_id):
             st.markdown(f"- **Grant ID**: {network_summary['grant_id']}")
             
             if treatment_connections > 0:
-                st.success(f"✅ **{treatment_connections} guaranteed pathways** from treatment papers to grant research!")
+                st.success(f"**{treatment_connections} verified pathways** from treatment research to grant funding")
             else:
-                st.warning("⚠️ No treatment pathway connections found")
+                st.warning("No treatment pathway connections found")
         
     except Exception as e:
         st.error(f"Error displaying metrics: {str(e)}")
@@ -538,22 +641,22 @@ def main():
     """Main application function"""
     
     # Header
-    st.markdown('<h1 class="main-header">🔬 Research Impact Dashboard</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666; margin-bottom: 2rem;">Enhanced with Realistic Citation Patterns & Guaranteed Research Pathways</p>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">Research Impact Network Analysis</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; font-size: 1.1rem; color: #a0aec0; margin-bottom: 3rem; font-weight: 300;">Mapping Research Pathways from Grant Funding to Breakthrough Treatments</p>', unsafe_allow_html=True)
     
     # Load data
     try:
         # Add cache clear button for debugging
-        if st.button("🔄 Clear Cache & Reload Data", help="Force reload database if you see old data"):
+        if st.button("Reload Data", help="Refresh database if needed"):
             st.cache_data.clear()
             st.rerun()
         
         nodes_df, edges_df, summary_df = load_database()
         
         # Debug info
-        st.sidebar.markdown("### 🔍 Database Info")
-        st.sidebar.write(f"Total edges: {len(edges_df)}")
-        st.sidebar.write(f"Treatment edges: {len(edges_df[edges_df['edge_type'] == 'leads_to_treatment'])}")
+        st.sidebar.markdown("### Database Statistics")
+        st.sidebar.write(f"Total connections: {len(edges_df)}")
+        st.sidebar.write(f"Treatment pathways: {len(edges_df[edges_df['edge_type'] == 'leads_to_treatment'])}")
         
         # Show citation pattern breakdown
         treatment_edges = edges_df[edges_df['edge_type'] == 'leads_to_treatment']
@@ -573,10 +676,10 @@ def main():
             return
         
         # Enhanced Network Selection with Search
-        st.markdown("## 🎯 Select Research Network")
+        st.markdown("## Network Selection")
         
         # Search functionality
-        st.markdown("### 🔍 Search Networks")
+        st.markdown("### Search & Filter")
         
         col1, col2 = st.columns([1, 2])
         
@@ -618,7 +721,7 @@ def main():
         
         # Display filtered network cards
         if len(filtered_networks) > 0:
-            st.markdown("### 📋 Available Networks")
+            st.markdown("### Available Research Networks")
             
             # Create columns based on number of filtered networks
             num_networks = len(filtered_networks)
@@ -637,27 +740,28 @@ def main():
                     with st.container():
                         # Highlight the matching search criteria
                         if search_type == "Disease":
-                            highlight_text = f"🎯 {network['disease']}"
+                            highlight_text = f"Target: {network['disease']}"
                         elif search_type == "Treatment":
-                            highlight_text = f"🎯 {network['treatment_name']}"
+                            highlight_text = f"Therapy: {network['treatment_name']}"
                         else:
-                            highlight_text = f"🎯 {network['grant_id']}"
+                            highlight_text = f"Grant: {network['grant_id']}"
                         
                         st.markdown(f"""
                         <div class="selection-card grant-card">
-                            <h3>🏥 {network['disease']}</h3>
-                            <p><strong>{network['treatment_name']}</strong></p>
-                            <p>Grant: {network['grant_id']}</p>
-                            <p>Duration: {network['research_duration']} years</p>
-                            <p>Funding: ${network['funding_amount']:,.0f}</p>
-                            <p style="color: #ff6b35; font-weight: bold;">{highlight_text}</p>
+                            <div class="network-title">{network['disease']}</div>
+                            <div class="treatment-name">{network['treatment_name']}</div>
+                            <div class="network-details">
+                                Grant ID: {network['grant_id']}<br>
+                                Research Duration: {network['research_duration']} years<br>
+                                <span style="color: #90cdf4; font-weight: 500;">{highlight_text}</span>
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        if st.button(f"Explore Network {network['network_id']}", key=f"btn_{network['network_id']}"):
+                        if st.button(f"Analyze Network {network['network_id']}", key=f"btn_{network['network_id']}"):
                             selected_network = network['network_id']
         else:
-            st.info("🔍 Use the search options above to find and explore research networks.")
+            st.info("Use the search options above to find and explore research networks.")
         
         # Use session state to maintain selection
         if 'selected_network' not in st.session_state:
