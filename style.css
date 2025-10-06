@@ -82,21 +82,7 @@
     margin: 0 auto 1rem auto;
 }
 
-/* Button styling */
-.stButton > button {
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.6rem 1.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.stButton > button:hover {
-    background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
-    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
-}
+/* Old button styling removed to prevent conflicts */
 
 /* Sidebar styling */
 .css-1d391kg {
@@ -146,39 +132,53 @@
     margin: 1rem 0;
 }
 
-/* Comprehensive button styling to override all Streamlit button defaults */
-.stButton > button {
-    background-color: #2d3748 !important;
-    color: #e2e8f0 !important;
-    border: 1px solid #4a5568 !important;
-    border-radius: 6px !important;
-    font-weight: 500 !important;
-    transition: all 0.3s ease !important;
-}
-
-.stButton > button:hover {
-    background-color: #4299e1 !important;
-    border-color: #63b3ed !important;
-    color: #ffffff !important;
-}
-
-.stButton > button:focus {
-    background-color: #4299e1 !important;
-    border-color: #63b3ed !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3) !important;
-}
-
-/* Target specific button types */
+/* Unified Button Styling - All buttons consistent with dark theme */
+.stButton > button,
 button[data-testid="baseButton-primary"],
-button[data-testid="baseButton-secondary"] {
-    background-color: #2d3748 !important;
-    color: #e2e8f0 !important;
-    border: 1px solid #4a5568 !important;
+button[data-testid="baseButton-secondary"],
+div[data-testid="stForm"] button {
+    background-color: #4299e1 !important;    /* Blue background - matches theme accent */
+    color: #ffffff !important;               /* White text for maximum contrast */
+    border: 1px solid #3182ce !important;    /* Darker blue border */
+    border-radius: 6px !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
 }
 
+/* Hover state - darker blue with glow effect */
+.stButton > button:hover,
 button[data-testid="baseButton-primary"]:hover,
-button[data-testid="baseButton-secondary"]:hover {
-    background-color: #4299e1 !important;
+button[data-testid="baseButton-secondary"]:hover,
+div[data-testid="stForm"] button:hover {
+    background-color: #3182ce !important;    /* Darker blue on hover */
+    border-color: #2c5282 !important;        /* Even darker border */
+    color: #ffffff !important;               /* Keep white text */
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4) !important;  /* Blue glow */
+    transform: translateY(-1px) !important;   /* Subtle lift effect */
+}
+
+/* Focus state - for accessibility */
+.stButton > button:focus,
+button[data-testid="baseButton-primary"]:focus,
+button[data-testid="baseButton-secondary"]:focus,
+div[data-testid="stForm"] button:focus {
+    background-color: #3182ce !important;
+    border-color: #2c5282 !important;
     color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5) !important;  /* Focus ring */
+    outline: none !important;
+}
+
+/* Active/pressed state */
+.stButton > button:active,
+button[data-testid="baseButton-primary"]:active,
+button[data-testid="baseButton-secondary"]:active,
+div[data-testid="stForm"] button:active {
+    background-color: #2c5282 !important;    /* Even darker when pressed */
+    border-color: #2a4365 !important;
+    transform: translateY(0px) !important;    /* Remove lift on press */
+    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3) !important;
 }
