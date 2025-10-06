@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 node_id,node_type,network_id,grant_id,funding_amount,year,pi_name,title,disease,treatment_name,approval_year,fda_approved,pmid,authors,journal,funded_by_grant,treatment_related
 GRANT_1,grant,1,INST-R01-877572,2076778.0,2015.0,Dr. James Wilson,Immunotherapy Research Initiative,Cancer,CAR-T Cell Therapy,2024.0,1.0,,,,,
 PUB_1_1,publication,1,,,2016.0,,Immunotherapy research: Novel therapeutic targets and mechanisms,,,,,28728463.0,"Dr. David Kim, Dr. Kevin Martinez, Dr. Emily Rodriguez, Dr. Matthew Miller, Dr. Michael Chen, Dr. Sarah Johnson, Dr. Andrew Jackson",Nature Medicine,1.0,0.0
@@ -101,3 +102,24 @@ TREAT_PUB_3_1,publication,3,,,2022.0,,Efficacy and safety of novel insulin thera
 TREAT_PUB_3_2,publication,3,,,2023.0,,Phase II study of glucose in diabetes patients,,,,,23951801.0,"Dr. Stephanie Thomas, Dr. James Wilson, Dr. Matthew Miller",Nature,0.0,1.0
 TREAT_PUB_3_3,publication,3,,,2022.0,,Efficacy and safety of novel insulin therapy for diabetes,,,,,47557512.0,"Dr. Michael Chen, Dr. James Wilson",The Lancet,0.0,1.0
 TREAT_3,treatment,3,,,,,,Diabetes,Smart Insulin Patch,2025.0,1.0,,,,,
+=======
+GRANT_1,grant,1,INST-R01-877572,2807113.0,2015.0,Dr. David Johnson,,,,,,,,,,
+PUB_1_1,publication,1,,,2018.0,,46913810.0,Cancer research: Novel therapeutic targets and mechanisms,Dr. James Rodriguez et al.,Cell,True,,,,,
+PUB_1_2,publication,1,,,2018.0,,23756669.0,Cancer research: Novel therapeutic targets and mechanisms,Dr. Andrew Brown et al.,PNAS,True,,,,,
+PUB_1_3,publication,1,,,2017.0,,14265799.0,Cancer research: Novel therapeutic targets and mechanisms,Dr. Sarah Brown et al.,New England Journal of Medicine,True,,,,,
+PUB_1_4,publication,1,,,2016.0,,77827638.0,Cancer research: Novel therapeutic targets and mechanisms,Dr. Joshua Johnson et al.,Nature Biotechnology,True,,,,,
+ECO_1_1,publication,1,,,2021.0,,66306997.0,Cancer related research: Supporting evidence and mechanisms,Dr. James Thomas et al.,PNAS,False,,,,,
+ECO_1_2,publication,1,,,2019.0,,10872248.0,Cancer related research: Supporting evidence and mechanisms,Dr. Robert Anderson et al.,Nature Medicine,False,,,,,
+ECO_1_3,publication,1,,,2019.0,,30868105.0,Cancer related research: Supporting evidence and mechanisms,Dr. Maria Lopez et al.,Science,False,,,,,
+ECO_1_4,publication,1,,,2017.0,,60992979.0,Cancer related research: Supporting evidence and mechanisms,Dr. David Gonzalez et al.,Nature Medicine,False,,,,,
+ECO_1_5,publication,1,,,2021.0,,45503389.0,Cancer related research: Supporting evidence and mechanisms,Dr. Michael Thomas et al.,Nature Biotechnology,False,,,,,
+ECO_1_6,publication,1,,,2017.0,,60806024.0,Cancer related research: Supporting evidence and mechanisms,Dr. Jennifer Jackson et al.,The Lancet,False,,,,,
+ECO_1_7,publication,1,,,2021.0,,58537831.0,Cancer related research: Supporting evidence and mechanisms,Dr. Stephanie Davis et al.,Science,False,,,,,
+ECO_1_8,publication,1,,,2017.0,,98753260.0,Cancer related research: Supporting evidence and mechanisms,Dr. James Hernandez et al.,Science,False,,,,,
+ECO_1_9,publication,1,,,2018.0,,23556182.0,Cancer related research: Supporting evidence and mechanisms,Dr. Jessica Martinez et al.,Cell Metabolism,False,,,,,
+ECO_1_10,publication,1,,,2019.0,,31831063.0,Cancer related research: Supporting evidence and mechanisms,Dr. Daniel Gonzalez et al.,New England Journal of Medicine,False,,,,,
+ECO_1_11,publication,1,,,2019.0,,96977837.0,Cancer related research: Supporting evidence and mechanisms,Dr. Jennifer Lee et al.,Cell,False,,,,,
+ECO_1_12,publication,1,,,2021.0,,42857966.0,Cancer related research: Supporting evidence and mechanisms,Dr. Robert Thomas et al.,Science Translational Medicine,False,,,,,
+ECO_1_13,publication,1,,,2019.0,,95899313.0,Cancer related research: Supporting evidence and mechanisms,Dr. Andrew Rodriguez et al.,Nature Medicine,False,,,,,
+ECO_1_14,publication,1,,,2017.0,,40742311.0,Cancer related research: Supporting evidence and mechanisms,Dr. Michael Lopez et al.,Science Translational Medicine,False,,,,,
+>>>>>>> 89211faa464cffdbf40d07a30c58474862e7ac5e

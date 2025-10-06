@@ -1,8 +1,8 @@
-source_id,target_id,edge_type,network_id
 GRANT_1,PUB_1_1,funded_by,1
 GRANT_1,PUB_1_2,funded_by,1
 GRANT_1,PUB_1_3,funded_by,1
 GRANT_1,PUB_1_4,funded_by,1
+<<<<<<< HEAD
 TREAT_PUB_1_1,TREAT_1,enables_treatment,1
 TREAT_PUB_1_2,TREAT_1,enables_treatment,1
 TREAT_PUB_1_3,TREAT_1,enables_treatment,1
@@ -775,3 +775,20 @@ ECO_3_25,ECO_3_11,cites,3
 ECO_3_25,ECO_3_18,cites,3
 ECO_3_25,ECO_3_21,cites,3
 ECO_3_25,ECO_3_23,cites,3
+=======
+PUB_1_1,PUB_1_2,cites,1
+PUB_1_3,PUB_1_1,cites,1
+PUB_1_4,PUB_1_2,cites,1
+PUB_1_4,PUB_1_3,cites,1
+ECO_1_1,PUB_1_1,cites,1
+ECO_1_2,PUB_1_3,cites,1
+ECO_1_2,PUB_1_2,cites,1
+ECO_1_2,PUB_1_1,cites,1
+ECO_1_3,PUB_1_3,cites,1
+ECO_1_4,PUB_1_2,cites,1
+ECO_1_4,PUB_1_1,cites,1
+ECO_1_5,PUB_1_1,cites,1
+ECO_1_6,PUB_1_4,cites,1
+ECO_1_7,PUB_1_2,cites,1
+ECO_1_8,PUB_1_4,cites,1
+>>>>>>> 89211faa464cffdbf40d07a30c58474862e7ac5e

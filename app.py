@@ -458,6 +458,7 @@ def main():
     """Main application function"""
     
     # Header
+<<<<<<< HEAD
     st.markdown('<h1 class="main-header">🔬 Research Impact Dashboard</h1>', unsafe_allow_html=True)
     st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666; margin-bottom: 2rem;">Enhanced with Realistic Citation Patterns & Guaranteed Research Pathways</p>', unsafe_allow_html=True)
     
@@ -578,3 +579,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+=======
+    st.markdown('<h1 class="main-head
+(Content truncated due to size limit. Use page ranges or line ranges to read remaining content)
+>>>>>>> 89211faa464cffdbf40d07a30c58474862e7ac5e
