@@ -1,4 +1,4 @@
-# Configuration for the Research Impact Dashboard
+# Configuration for the Research Impact Dashboard (Refined Layout)
 
 # --- Data Loading ---
 DATABASE_PATH = 'streamlit_research_database.db'
@@ -16,43 +16,47 @@ EDGE_TYPE_LEADS_TO_TREATMENT = 'leads_to_treatment'
 EDGE_TYPE_CITES = 'cites'
 EDGE_TYPE_ENABLES_TREATMENT = 'enables_treatment'
 
-# --- Visualization ---
+# --- Visualization Colors ---
 NODE_COLORS = {
-    'grant': '#4299e1',
-    'publication': '#a0aec0',
-    'treatment': '#38b2ac',
-    'grant_funded_pub': '#718096',
-    'treatment_pathway_pub': '#ed8936',
-    'ecosystem_pub': '#718096'
+    'grant': '#4299e1',               # Blue
+    'publication': '#a0aec0',         # Gray
+    'treatment': '#38b2ac',           # Teal
+    'grant_funded_pub': '#718096',    # Muted gray-blue
+    'treatment_pathway_pub': '#ed8936',  # Orange
+    'ecosystem_pub': '#718096'        # Gray for ecosystem nodes
 }
 
+# --- Node Sizes ---
 NODE_SIZES = {
-    'grant': 30,
+    'grant': 30,                # Main funding node
     'publication': 10,
-    'treatment': 35,
-    'grant_funded_pub': 12,
+    'treatment': 35,            # Final approved therapy
+    'grant_funded_pub': 15,     # ⬆️ Slightly larger than before (closer to treatment_pathway_pub)
     'treatment_pathway_pub': 15,
     'ecosystem_pub': 8
 }
 
+# --- Edge Colors ---
 EDGE_COLORS = {
-    'funded_by': 'rgba(74, 85, 104, 0.8)',
-    'leads_to_treatment': 'rgba(99, 179, 237, 0.9)',
-    'cites': 'rgba(160, 174, 192, 0.25)',
-    'enables_treatment': 'rgba(56, 178, 172, 0.8)'
+    'funded_by': 'rgba(74, 85, 104, 0.7)',           # ⬇️ Slightly lighter for subtle lines
+    'leads_to_treatment': 'rgba(99, 179, 237, 0.9)', # Bright blue for impact pathway
+    'cites': 'rgba(160, 174, 192, 0.25)',            # Faint gray for ecosystem citations
+    'enables_treatment': 'rgba(56, 178, 172, 0.8)'   # Teal-green for final link to treatment
 }
 
+# --- Edge Widths ---
 EDGE_WIDTHS = {
-    'funded_by': 3,
+    'funded_by': 1.5,          # ⬇️ Thinner than before but still thicker than ecosystem (was 3)
     'leads_to_treatment': 3,
-    'cites': 0.8,
+    'cites': 0.8,              # Ecosystem edges remain thin
     'enables_treatment': 2
 }
 
-# --- Layout ---
+# --- Layout Positions (Distances) ---
+# Bringing grant-funded papers closer to the grant node for tighter clustering
 NODE_POSITIONS_X = {
-    'grant': -5,
-    'grant_funded_pub': -2.5,
+    'grant': -4,                 # ⬅️ Was -5, moved slightly right
+    'grant_funded_pub': -2.5,    # Stays the same; together with grant moved closer
     'ecosystem_pub_cluster': [-0.5, 0.5, 1.5, 0],
     'treatment_pathway_pub': 3.5,
     'treatment': 6
@@ -65,4 +69,3 @@ NODE_POSITIONS_Y = {
     'treatment_pathway_pub': [1, 0, -1],
     'treatment': 0
 }
-
