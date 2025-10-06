@@ -146,9 +146,9 @@
     margin: 1rem 0;
 }
 
-/* Secondary button styling override */
-div[data-testid="stButton"] > button[kind="secondary"] {
-    background-color: rgba(45, 55, 72, 0.8) !important;
+/* Comprehensive button styling to override all Streamlit button defaults */
+.stButton > button {
+    background-color: #2d3748 !important;
     color: #e2e8f0 !important;
     border: 1px solid #4a5568 !important;
     border-radius: 6px !important;
@@ -156,8 +156,29 @@ div[data-testid="stButton"] > button[kind="secondary"] {
     transition: all 0.3s ease !important;
 }
 
-div[data-testid="stButton"] > button[kind="secondary"]:hover {
-    background-color: rgba(66, 153, 225, 0.2) !important;
+.stButton > button:hover {
+    background-color: #4299e1 !important;
     border-color: #63b3ed !important;
+    color: #ffffff !important;
+}
+
+.stButton > button:focus {
+    background-color: #4299e1 !important;
+    border-color: #63b3ed !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3) !important;
+}
+
+/* Target specific button types */
+button[data-testid="baseButton-primary"],
+button[data-testid="baseButton-secondary"] {
+    background-color: #2d3748 !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #4a5568 !important;
+}
+
+button[data-testid="baseButton-primary"]:hover,
+button[data-testid="baseButton-secondary"]:hover {
+    background-color: #4299e1 !important;
     color: #ffffff !important;
 }

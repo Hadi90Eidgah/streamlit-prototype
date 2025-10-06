@@ -227,7 +227,31 @@ def main():
     # Refresh button with better styling
     col1, col2, col3 = st.columns([1, 1, 8])
     with col2:
-        if st.button("🔄 Refresh Data", help="Refresh database if needed", type="secondary"):
+        st.markdown("""
+        <style>
+        .refresh-btn {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: block;
+            width: 100%;
+            text-decoration: none;
+        }
+        .refresh-btn:hover {
+            background-color: #4299e1;
+            color: #ffffff;
+            border-color: #63b3ed;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        if st.button("🔄 Refresh Data", help="Refresh database if needed"):
             st.cache_data.clear()
             st.rerun()
 
