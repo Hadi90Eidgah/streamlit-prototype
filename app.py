@@ -319,7 +319,7 @@ def main():
             if network_id in current_networks['network_id'].values:
                 selected_summary = current_networks[current_networks['network_id'] == network_id].iloc[0]
                 
-                st.markdown(f"## 📊 Network {network_id}: {selected_summary['disease']} Research Impact")
+                st.markdown(f"## Citation Network: {selected_summary['disease']} Research Impact")
                 display_network_metrics(summary_df, edges_df, network_id)
 
                 st.markdown("### 🕸️ Research Network Visualization")
