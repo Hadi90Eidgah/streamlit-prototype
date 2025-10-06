@@ -2751,12 +2751,6 @@
       "network_id": 2
     },
     {
-      "source_id": "ECO_2_11",
-      "target_id": "PUB_2_2",
-      "edge_type": "cites",
-      "network_id": 2
-    },
-    {
       "source_id": "ECO_2_13",
       "target_id": "PUB_2_4",
       "edge_type": "cites",
@@ -2765,12 +2759,6 @@
     {
       "source_id": "ECO_2_17",
       "target_id": "PUB_2_4",
-      "edge_type": "cites",
-      "network_id": 2
-    },
-    {
-      "source_id": "ECO_2_18",
-      "target_id": "PUB_2_2",
       "edge_type": "cites",
       "network_id": 2
     },
@@ -2789,12 +2777,6 @@
     {
       "source_id": "ECO_2_22",
       "target_id": "PUB_2_1",
-      "edge_type": "cites",
-      "network_id": 2
-    },
-    {
-      "source_id": "ECO_2_22",
-      "target_id": "PUB_2_3",
       "edge_type": "cites",
       "network_id": 2
     },
@@ -3306,15 +3288,15 @@
     }
   ],
   "metadata": {
-    "generated_at": "2025-10-06T05:23:56.513356",
-    "version": "3.1_manual_update",
+    "generated_at": "2025-10-06T05:27:21.808420",
+    "version": "3.2_manual_focused_citations",
     "total_networks": 3,
     "total_nodes": 102,
-    "total_edges": 204,
+    "total_edges": 201,
     "manual_updates": [
-      "Network 1: Duchenne Muscular Dystrophy \u2192 Givinostat",
-      "Network 2: Huntington Disease \u2192 AMT-130",
-      "Network 3: Diabetes \u2192 Smart Insulin Patch (unchanged)"
+      "Network 2: Focused citations to only 2 grant publications (PUB_2_1, PUB_2_4)",
+      "Removed ecosystem citations to PUB_2_2 and PUB_2_3",
+      "Total edges reduced from 204 to 201"
     ]
   }
 }
