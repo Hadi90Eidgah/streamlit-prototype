@@ -298,27 +298,11 @@ class EnhancedStreamlitDatabaseGenerator:
                             "network_id": network_id
                         })
         
-        # 4. RARE DIRECT CITATIONS: Treatment → Grant (5% probability)
-        for treatment_paper in treatment_papers:
-            for grant_paper in grant_papers:
-                if (treatment_paper["year"] > grant_paper["year"] and 
-                    random.random() < 0.05):  # 5% probability
-                    
-                    # Check if this would create a duplicate
-                    existing_edge = any(
-                        e["source_id"] == treatment_paper["node_id"] and 
-                        e["target_id"] == grant_paper["node_id"]
-                        for e in edges
-                    )
-                    if not existing_edge:
-                        edges.append({
-                            "source_id": treatment_paper["node_id"],
-                            "target_id": grant_paper["node_id"],
-                            "edge_type": "leads_to_treatment",
-                            "network_id": network_id
-                        })
+        # 4. NO DIRECT CITATIONS: Treatment papers never cite grant papers directly
+        # This creates more realistic citation patterns where treatment papers
+        # only cite through the research ecosystem (ecosystem papers cite grants)
         
-        # 5. ECOSYSTEM → GRANT CITATIONS (Medium probability for non-bridge papers)
+        # 4. ECOSYSTEM → GRANT CITATIONS (Medium probability for non-bridge papers)
         for eco_paper in ecosystem_papers:
             if eco_paper not in bridge_papers:  # Non-bridge papers
                 for grant_paper in grant_papers:

@@ -1,4 +1,4 @@
 network_id,disease,treatment_name,grant_id,grant_year,approval_year,funding_amount,total_publications,research_duration,guaranteed_chains
 1,Cancer,CAR-T Cell Therapy,INST-R01-877572,2015,2024,2076778,32,9,1
-2,Alzheimer's Disease,Aducanumab Plus,INST-P01-290556,2016,2023,1605454,32,7,2
-3,Diabetes,Smart Insulin Patch,INST-R01-517479,2017,2025,2078565,32,8,3
+2,Alzheimer's Disease,Aducanumab Plus,INST-P01-859359,2017,2023,1846123,32,6,2
+3,Diabetes,Smart Insulin Patch,INST-U01-564920,2017,2025,2432594,32,8,3
