@@ -261,3 +261,10 @@ div[data-testid="stMetricLabel"] {
 div[data-testid="stMetricDelta"] {
     color: #9aa09f !important; /* teal accent for delta text */
 }
+/* Fix metric label (e.g., "Publications", "Research Duration") color */
+div[data-testid="stMetricLabel"] {
+    color: #e2e8f0 !important;  /* light gray-white for strong contrast */
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    opacity: 1 !important; /* Streamlit sometimes dims these labels */
+}
