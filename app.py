@@ -261,59 +261,84 @@ def main():
         
         st.markdown('</div>', unsafe_allow_html=True)
 
-    if selected_search:
+    # Only show networks if a search selection has been made
+    if selected_search and selected_search != "":
         if search_type == "Disease":
             filtered_networks = summary_df[summary_df['disease'] == selected_search]
         elif search_type == "Treatment":
             filtered_networks = summary_df[summary_df['treatment_name'] == selected_search]
         else:  # Grant
             filtered_networks = summary_df[summary_df['grant_id'] == selected_search]
-    else:
-        filtered_networks = summary_df
 
-    if not filtered_networks.empty:
-        st.markdown("### Available Research Networks")
-        
-        # Create a more compact grid layout
-        num_networks = len(filtered_networks)
-        if num_networks <= 3:
-            cols = st.columns(num_networks)
+        if not filtered_networks.empty:
+            st.markdown("### Available Research Networks")
+            
+            # Create a more compact grid layout
+            num_networks = len(filtered_networks)
+            if num_networks <= 3:
+                cols = st.columns(num_networks)
+            else:
+                cols = st.columns(3)
+            
+            selected_network = None
+
+            for i, (_, network) in enumerate(filtered_networks.iterrows()):
+                with cols[i % len(cols)]:
+                    with st.container():
+                        st.markdown(f"""<div class="selection-card grant-card">
+                            <div class="network-title">{network['disease']}</div>
+                            <div class="treatment-name">{network['treatment_name']}</div>
+                            <div class="network-details">Grant ID: {network['grant_id']}<br>Duration: {network['research_duration']} years</div>
+                        </div>""", unsafe_allow_html=True)
+                        if st.button(f"Analyze Network {network['network_id']}", key=f"btn_{network['network_id']}", use_container_width=True):
+                            selected_network = network['network_id']
         else:
-            cols = st.columns(3)
-        
+            st.info("No networks found for the selected criteria.")
+    else:
+        # Show instruction message when no selection is made
+        st.info("👆 Please select a disease, treatment, or grant from the dropdown above to view available research networks.")
         selected_network = None
 
-        for i, (_, network) in enumerate(filtered_networks.iterrows()):
-            with cols[i % len(cols)]:
-                with st.container():
-                    st.markdown(f"""<div class="selection-card grant-card">
-                        <div class="network-title">{network['disease']}</div>
-                        <div class="treatment-name">{network['treatment_name']}</div>
-                        <div class="network-details">Grant ID: {network['grant_id']}<br>Duration: {network['research_duration']} years</div>
-                    </div>""", unsafe_allow_html=True)
-                    if st.button(f"Analyze Network {network['network_id']}", key=f"btn_{network['network_id']}", use_container_width=True):
-                        selected_network = network['network_id']
-    else:
-        st.info("No networks found for the selected criteria.")
-
-    if 'selected_network' not in st.session_state:
-        st.session_state.selected_network = 1
+    # Handle network selection and visualization
     if selected_network:
-        st.session_state.selected_network = selected_network
-
-    network_id = st.session_state.selected_network
-    selected_summary = summary_df[summary_df['network_id'] == network_id].iloc[0]
-
-    st.markdown(f"## 📊 Network {network_id}: {selected_summary['disease']} Research Impact")
-    display_network_metrics(summary_df, edges_df, network_id)
-
-    st.markdown("### 🕸️ Research Network Visualization")
-    with st.spinner("Creating network visualization..."):
-        fig = create_network_visualization(nodes_df, edges_df, network_id)
-        if fig.data:
-            st.plotly_chart(fig, use_container_width=True)
+        if 'selected_network' not in st.session_state:
+            st.session_state.selected_network = selected_network
         else:
-            st.error("Unable to create network visualization")
+            st.session_state.selected_network = selected_network
+
+    # Only show network analysis if a network has been selected
+    if 'selected_network' in st.session_state and st.session_state.selected_network:
+        network_id = st.session_state.selected_network
+        
+        # Verify the network still exists in the current filtered data
+        if selected_search and selected_search != "":
+            # Use filtered networks
+            if search_type == "Disease":
+                current_networks = summary_df[summary_df['disease'] == selected_search]
+            elif search_type == "Treatment":
+                current_networks = summary_df[summary_df['treatment_name'] == selected_search]
+            else:  # Grant
+                current_networks = summary_df[summary_df['grant_id'] == selected_search]
+            
+            if network_id in current_networks['network_id'].values:
+                selected_summary = current_networks[current_networks['network_id'] == network_id].iloc[0]
+                
+                st.markdown(f"## 📊 Network {network_id}: {selected_summary['disease']} Research Impact")
+                display_network_metrics(summary_df, edges_df, network_id)
+
+                st.markdown("### 🕸️ Research Network Visualization")
+                with st.spinner("Creating network visualization..."):
+                    fig = create_network_visualization(nodes_df, edges_df, network_id)
+                    if fig.data:
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.error("Unable to create network visualization")
+            else:
+                # Selected network is not in current filter, clear selection
+                st.session_state.selected_network = None
+        else:
+            # No search selection made, don't show network analysis
+            pass
 
 if __name__ == "__main__":
     main()
