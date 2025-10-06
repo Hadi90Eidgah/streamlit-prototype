@@ -157,22 +157,78 @@ def create_edge_trace(edges, node_positions, edge_type, name, showlegend):
     )
 
 def create_node_trace(nodes, node_positions, node_type, name, text_template, showlegend):
-    """Create a Plotly scatter trace for nodes."""
-    node_x = [node_positions[node['node_id']][0] for _, node in nodes.iterrows() if node['node_id'] in node_positions]
-    node_y = [node_positions[node['node_id']][1] for _, node in nodes.iterrows() if node['node_id'] in node_positions]
+    """Create a Plotly scatter trace for nodes with detailed hover text."""
+    node_x, node_y, hover_texts = [], [], []
 
-    if not node_x:
-        return None
+    for _, node in nodes.iterrows():
+        node_id = node['node_id']
+        if node_id not in node_positions:
+            continue
+
+        x, y = node_positions[node_id]
+        node_x.append(x)
+        node_y.append(y)
+
+        # --- Create richer hover content ---
+        if node_type == 'grant_funded_pub' or node_id.startswith('PUB_'):
+            hover_text = (
+                f"<b>Grant-Funded Publication</b><br>"
+                f"<b>Title:</b> {node.get('title', 'N/A')}<br>"
+                f"<b>Year:</b> {int(node['year']) if pd.notna(node.get('year')) else 'N/A'}<br>"
+                f"<b>PubMed ID:</b> {int(node['pmid']) if pd.notna(node.get('pmid')) else 'N/A'}<br>"
+                f"<b>Authors:</b> {node.get('authors', 'N/A')}"
+            )
+
+        elif node_type == 'treatment_pathway_pub' or node_id.startswith('TREAT_PUB_'):
+            hover_text = (
+                f"<b>Treatment Pathway Paper</b><br>"
+                f"<b>Title:</b> {node.get('title', 'N/A')}<br>"
+                f"<b>Year:</b> {int(node['year']) if pd.notna(node.get('year')) else 'N/A'}<br>"
+                f"<b>Journal:</b> {node.get('journal', 'N/A')}<br>"
+                f"<b>Authors:</b> {node.get('authors', 'N/A')}"
+            )
+
+        elif node_type == 'ecosystem_pub' or node_id.startswith('ECO_'):
+            hover_text = (
+                f"<b>Research Ecosystem</b><br>"
+                f"<b>Title:</b> {node.get('title', 'N/A')}<br>"
+                f"<b>Journal:</b> {node.get('journal', 'N/A')}<br>"
+                f"<b>Authors:</b> {node.get('authors', 'N/A')}"
+            )
+
+        elif node_type == 'grant':
+            hover_text = (
+                f"<b>Research Grant</b><br>"
+                f"<b>ID:</b> {node.get('grant_id', 'N/A')}<br>"
+                f"<b>PI:</b> {node.get('pi_name', 'N/A')}<br>"
+                f"<b>Funding:</b> ${int(node['funding_amount']) if pd.notna(node.get('funding_amount')) else 'N/A'}<br>"
+                f"<b>Disease:</b> {node.get('disease', 'N/A')}"
+            )
+
+        elif node_type == 'treatment':
+            hover_text = (
+                f"<b>Approved Treatment</b><br>"
+                f"<b>Name:</b> {node.get('treatment_name', 'N/A')}<br>"
+                f"<b>Approval Year:</b> {int(node['approval_year']) if pd.notna(node.get('approval_year')) else 'N/A'}"
+            )
+
+        else:
+            hover_text = text_template
+
+        hover_texts.append(hover_text)
 
     return go.Scatter(
         x=node_x, y=node_y,
         mode='markers',
         hoverinfo='text',
-        text=[text_template] * len(node_x),
-        marker=dict(size=NODE_SIZES[node_type], color=NODE_COLORS[node_type], line=dict(width=2, color='#e2e8f0')),
+        text=hover_texts,   # <-- dynamic content here
+        marker=dict(size=NODE_SIZES[node_type],
+                    color=NODE_COLORS[node_type],
+                    line=dict(width=2, color='#e2e8f0')),
         name=name,
         showlegend=showlegend
     )
+
 
 def create_network_visualization(nodes_df, edges_df, network_id, grant_id=None, treatment_name=None):
     """Create the network visualization."""
