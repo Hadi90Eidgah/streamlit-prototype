@@ -14,16 +14,17 @@
     letter-spacing: 1px;
 }
 
-/* Elegant network selection cards */
+/* Network Selection Cards */
 .selection-card { 
     background: linear-gradient(135deg, #1e2329 0%, #2d3748 100%);
-    padding: 1.8rem; 
-    border-radius: 12px; 
+    padding: 1.2rem; 
+    border-radius: 8px; 
     border: 1px solid #4a5568; 
-    margin: 1rem 0; 
+    margin: 0.5rem 0; 
     text-align: left;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
+    max-width: 300px;
 }
 
 .selection-card:hover {
@@ -54,7 +55,7 @@
 
 .network-details {
     font-size: 0.9rem;
-    color: #a0aec0;
+    color: #cbd5e0;
     line-height: 1.6;
 }
 
@@ -69,10 +70,16 @@
 /* Search section styling */
 .search-section {
     background: rgba(30, 35, 41, 0.8);
-    padding: 1.5rem;
-    border-radius: 10px;
+    padding: 1rem;
+    border-radius: 8px;
     border: 1px solid #4a5568;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Compact search controls */
+.search-controls {
+    max-width: 600px;
+    margin: 0 auto 1rem auto;
 }
 
 /* Button styling */

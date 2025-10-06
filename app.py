@@ -237,19 +237,29 @@ def main():
         return
 
     st.markdown("## Network Selection")
-    search_type = st.selectbox("Search by:", ["Disease", "Treatment", "Grant"], key="search_type")
+    
+    # Compact search controls
+    with st.container():
+        st.markdown('<div class="search-controls">', unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            search_type = st.selectbox("Search by:", ["Disease", "Treatment", "Grant"], key="search_type")
+        
+        with col2:
+            if search_type == "Disease":
+                search_options = summary_df['disease'].unique().tolist()
+                search_placeholder = "Select a disease..."
+            elif search_type == "Treatment":
+                search_options = summary_df['treatment_name'].unique().tolist()
+                search_placeholder = "Select a treatment..."
+            else:  # Grant
+                search_options = summary_df['grant_id'].unique().tolist()
+                search_placeholder = "Select a grant..."
 
-    if search_type == "Disease":
-        search_options = summary_df['disease'].unique().tolist()
-        search_placeholder = "Select a disease..."
-    elif search_type == "Treatment":
-        search_options = summary_df['treatment_name'].unique().tolist()
-        search_placeholder = "Select a treatment..."
-    else:  # Grant
-        search_options = summary_df['grant_id'].unique().tolist()
-        search_placeholder = "Select a grant..."
-
-    selected_search = st.selectbox(f"Select {search_type.lower()}:", [""] + search_options, key="search_selection", format_func=lambda x: search_placeholder if x == "" else x)
+            selected_search = st.selectbox(f"Select {search_type.lower()}:", [""] + search_options, key="search_selection", format_func=lambda x: search_placeholder if x == "" else x)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
     if selected_search:
         if search_type == "Disease":
@@ -263,8 +273,14 @@ def main():
 
     if not filtered_networks.empty:
         st.markdown("### Available Research Networks")
+        
+        # Create a more compact grid layout
         num_networks = len(filtered_networks)
-        cols = st.columns(min(num_networks, 3))
+        if num_networks <= 3:
+            cols = st.columns(num_networks)
+        else:
+            cols = st.columns(3)
+        
         selected_network = None
 
         for i, (_, network) in enumerate(filtered_networks.iterrows()):
@@ -273,9 +289,9 @@ def main():
                     st.markdown(f"""<div class="selection-card grant-card">
                         <div class="network-title">{network['disease']}</div>
                         <div class="treatment-name">{network['treatment_name']}</div>
-                        <div class="network-details">Grant ID: {network['grant_id']}</div>
+                        <div class="network-details">Grant ID: {network['grant_id']}<br>Duration: {network['research_duration']} years</div>
                     </div>""", unsafe_allow_html=True)
-                    if st.button(f"Analyze Network {network['network_id']}", key=f"btn_{network['network_id']}"):
+                    if st.button(f"Analyze Network {network['network_id']}", key=f"btn_{network['network_id']}", use_container_width=True):
                         selected_network = network['network_id']
     else:
         st.info("No networks found for the selected criteria.")
