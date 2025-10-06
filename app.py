@@ -224,34 +224,33 @@ def main():
     # Load data
     nodes_df, edges_df, summary_df = load_database()
 
-    # Refresh button with better styling
+    # Custom refresh button with guaranteed styling
     col1, col2, col3 = st.columns([1, 1, 8])
     with col2:
-        st.markdown("""
-        <style>
-        .refresh-btn {
-            background-color: #2d3748;
-            color: #e2e8f0;
-            border: 1px solid #4a5568;
-            border-radius: 6px;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            display: block;
-            width: 100%;
-            text-decoration: none;
-        }
-        .refresh-btn:hover {
-            background-color: #4299e1;
-            color: #ffffff;
-            border-color: #63b3ed;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        if st.button("🔄 Refresh Data", help="Refresh database if needed"):
+        # Use a form with custom styling
+        with st.form("refresh_form"):
+            st.markdown("""
+            <style>
+            /* Style the form submit button */
+            .stForm > div > div > button {
+                background-color: #2d3748 !important;
+                color: #e2e8f0 !important;
+                border: 1px solid #4a5568 !important;
+                border-radius: 6px !important;
+                font-weight: 500 !important;
+                width: 100% !important;
+            }
+            .stForm > div > div > button:hover {
+                background-color: #4299e1 !important;
+                color: #ffffff !important;
+                border-color: #63b3ed !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            refresh_clicked = st.form_submit_button("🔄 Refresh Data")
+            
+        if refresh_clicked:
             st.cache_data.clear()
             st.rerun()
 
