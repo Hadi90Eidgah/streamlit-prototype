@@ -47,7 +47,7 @@ EDGE_COLORS = {
 # --- Edge Widths ---
 EDGE_WIDTHS = {
     'funded_by': 1.5,           # Grant → Funded Papers
-    'leads_to_treatment': 3,    # Pathway links remain strong
+    'leads_to_treatment': 1.8,    # Pathway links remain strong
     'cites': 0.8,               # Thin ecosystem edges
     'enables_treatment': 1.5    # ⬅️ Same thickness as funded_by (was 2)
 }
