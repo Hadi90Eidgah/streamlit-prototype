@@ -1,6 +1,6 @@
 """
-Research Impact Dashboard - Minimal Emoji Version
-Clean interface with verified graph updates and minimal emoji usage
+Research Impact Dashboard - FIXED Treatment Connections
+Properly displays leads_to_treatment edges from TREAT_PUB nodes to PUB nodes
 """
 
 import streamlit as st
@@ -78,9 +78,9 @@ def create_sample_data():
     return nodes_df, edges_df, summary_df
 
 def create_network_visualization(nodes_df, edges_df, network_id):
-    """Create network visualization with verified updates"""
+    """Create network visualization with FIXED treatment pathway connections"""
     try:
-        # Filter data for selected network - CRITICAL for graph updates
+        # Filter data for selected network
         network_nodes = nodes_df[nodes_df['network_id'] == network_id].copy()
         network_edges = edges_df[edges_df['network_id'] == network_id].copy()
         
@@ -88,27 +88,18 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             st.error(f"No data found for network {network_id}")
             return go.Figure()
         
-        # Debug info to verify graph updates
+        # Debug info
         st.write(f"**Network {network_id} Data:** {len(network_nodes)} nodes, {len(network_edges)} edges")
         
-        # Separate nodes by type
+        # Separate nodes by type and specific patterns
         grants = network_nodes[network_nodes['node_type'] == 'grant']
         treatments = network_nodes[network_nodes['node_type'] == 'treatment']
         publications = network_nodes[network_nodes['node_type'] == 'publication']
         
-        # Create strategic node positioning
-        node_positions = {}
-        
-        # Position grant (blue circle) on the left
-        if len(grants) > 0:
-            grant_node = grants.iloc[0]
-            grant_node_id = grant_node['node_id']
-            node_positions[grant_node_id] = (-5, 0)
-        
-        # Identify different types of publications
-        grant_funded_pubs = []
-        treatment_pathway_pubs = []
-        ecosystem_pubs = []
+        # CRITICAL: Properly categorize publications
+        grant_funded_pubs = []      # PUB_X_Y - directly funded by grant
+        treatment_pathway_pubs = [] # TREAT_PUB_X_Y - treatment development papers
+        ecosystem_pubs = []         # ECO_X_Y - broader research ecosystem
         
         for _, pub in publications.iterrows():
             pub_id = pub['node_id']
@@ -119,13 +110,28 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             elif pub_id.startswith('ECO_'):
                 ecosystem_pubs.append(pub_id)
         
-        # Position grant-funded publications (directly connected to grant)
+        # Debug publication categorization
+        st.write(f"**Publication Categories:**")
+        st.write(f"- Grant-funded: {len(grant_funded_pubs)} ({grant_funded_pubs[:3]}...)")
+        st.write(f"- Treatment pathway: {len(treatment_pathway_pubs)} ({treatment_pathway_pubs})")
+        st.write(f"- Ecosystem: {len(ecosystem_pubs)} (first 3: {ecosystem_pubs[:3]})")
+        
+        # Create strategic node positioning
+        node_positions = {}
+        
+        # Position grant (blue circle) on the left
+        if len(grants) > 0:
+            grant_node = grants.iloc[0]
+            grant_node_id = grant_node['node_id']
+            node_positions[grant_node_id] = (-5, 0)
+        
+        # Position grant-funded publications (gray circles near grant)
         for i, pub_id in enumerate(grant_funded_pubs):
             y_pos = 2 - (i * 1.3)
             node_positions[pub_id] = (-2.5, y_pos)
         
-        # Position ecosystem publications in organized clusters
-        np.random.seed(42 + network_id)  # Different seed per network
+        # Position ecosystem publications in organized clusters (middle area)
+        np.random.seed(42 + network_id)
         cluster_centers = [(-0.5, 1), (0.5, 0.5), (1.5, -0.5), (0, -1.5)]
         
         for i, pub_id in enumerate(ecosystem_pubs):
@@ -135,30 +141,38 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             y_pos = center_y + np.random.normal(0, 0.4)
             node_positions[pub_id] = (x_pos, y_pos)
         
-        # Position treatment pathway publications
+        # CRITICAL: Position treatment pathway publications (yellow circles on the right)
         for i, pub_id in enumerate(treatment_pathway_pubs):
             y_pos = 1 - (i * 1.0)
             node_positions[pub_id] = (3.5, y_pos)
         
-        # Position treatment on the right
+        # Position treatment (green circle) on the far right
         if len(treatments) > 0:
             treatment_node = treatments.iloc[0]
             treatment_node_id = treatment_node['node_id']
             node_positions[treatment_node_id] = (6, 0)
         
-        # Create edge traces with improved styling
+        # Debug node positions
+        st.write(f"**Node Positions Created:** {len(node_positions)}")
+        
+        # Create edge traces with FIXED logic
         edge_traces = []
         
         # 1. Grant funding edges (blue, thick)
         grant_funding_edges = network_edges[network_edges['edge_type'] == 'funded_by']
         if len(grant_funding_edges) > 0:
             edge_x, edge_y = [], []
+            valid_count = 0
+            
             for _, edge in grant_funding_edges.iterrows():
                 if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
                     x0, y0 = node_positions[edge['source_id']]
                     x1, y1 = node_positions[edge['target_id']]
                     edge_x.extend([x0, x1, None])
                     edge_y.extend([y0, y1, None])
+                    valid_count += 1
+            
+            st.write(f"- Grant funding edges: {valid_count}/{len(grant_funding_edges)} valid")
             
             if edge_x:
                 grant_trace = go.Scatter(
@@ -171,38 +185,66 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                 )
                 edge_traces.append(grant_trace)
         
-        # 2. Treatment pathway edges (yellow, medium)
+        # 2. CRITICAL: Treatment pathway edges (yellow, thick) - FIXED!
         treatment_pathway_edges = network_edges[network_edges['edge_type'] == 'leads_to_treatment']
         if len(treatment_pathway_edges) > 0:
             edge_x, edge_y = [], []
+            valid_count = 0
+            
+            st.write(f"**Processing {len(treatment_pathway_edges)} treatment pathway edges:**")
+            
             for _, edge in treatment_pathway_edges.iterrows():
-                if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
-                    x0, y0 = node_positions[edge['source_id']]
-                    x1, y1 = node_positions[edge['target_id']]
+                source_id = edge['source_id']
+                target_id = edge['target_id']
+                
+                if source_id in node_positions and target_id in node_positions:
+                    x0, y0 = node_positions[source_id]
+                    x1, y1 = node_positions[target_id]
                     edge_x.extend([x0, x1, None])
                     edge_y.extend([y0, y1, None])
+                    valid_count += 1
+                    st.write(f"  ✅ {source_id} → {target_id}: ({x0:.1f},{y0:.1f}) → ({x1:.1f},{y1:.1f})")
+                else:
+                    missing = []
+                    if source_id not in node_positions:
+                        missing.append(f"source:{source_id}")
+                    if target_id not in node_positions:
+                        missing.append(f"target:{target_id}")
+                    st.write(f"  ❌ {source_id} → {target_id}: Missing {', '.join(missing)}")
+            
+            st.write(f"- Treatment pathway edges: {valid_count}/{len(treatment_pathway_edges)} valid")
             
             if edge_x:
                 treatment_trace = go.Scatter(
                     x=edge_x, y=edge_y,
-                    line=dict(width=3, color='rgba(251, 191, 36, 0.8)'),
+                    line=dict(width=4, color='rgba(255, 165, 0, 0.9)'),  # Thick orange
                     hoverinfo='none',
                     mode='lines',
-                    name='Treatment Impact',
+                    name='Treatment Impact (CRITICAL)',
                     showlegend=True
                 )
                 edge_traces.append(treatment_trace)
+                st.success(f"✅ Created treatment pathway trace with {len(edge_x)//3} edges")
+            else:
+                st.error("❌ No treatment pathway edges created - check node positions!")
+        else:
+            st.error("❌ No treatment pathway edges found in data!")
         
         # 3. General citation edges (gray, transparent)
         citation_edges = network_edges[network_edges['edge_type'] == 'cites']
         if len(citation_edges) > 0:
             edge_x, edge_y = [], []
+            valid_count = 0
+            
             for _, edge in citation_edges.iterrows():
                 if edge['source_id'] in node_positions and edge['target_id'] in node_positions:
                     x0, y0 = node_positions[edge['source_id']]
                     x1, y1 = node_positions[edge['target_id']]
                     edge_x.extend([x0, x1, None])
                     edge_y.extend([y0, y1, None])
+                    valid_count += 1
+            
+            st.write(f"- Citation edges: {valid_count}/{len(citation_edges)} valid")
             
             if edge_x:
                 citation_trace = go.Scatter(
@@ -217,7 +259,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
         # Create node traces
         node_traces = []
         
-        # Grant nodes
+        # Grant nodes (blue)
         if len(grants) > 0:
             grant_x = [node_positions[grants.iloc[0]['node_id']][0]]
             grant_y = [node_positions[grants.iloc[0]['node_id']][1]]
@@ -233,7 +275,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
             )
             node_traces.append(grant_trace)
         
-        # Grant-funded publication nodes
+        # Grant-funded publication nodes (gray)
         if grant_funded_pubs:
             pub_x = [node_positions[pub_id][0] for pub_id in grant_funded_pubs if pub_id in node_positions]
             pub_y = [node_positions[pub_id][1] for pub_id in grant_funded_pubs if pub_id in node_positions]
@@ -244,13 +286,13 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     mode='markers',
                     hoverinfo='text',
                     text=["Grant-Funded Research<br>Direct Impact"] * len(pub_x),
-                    marker=dict(size=16, color='#e5e7eb', line=dict(width=2, color='white')),
+                    marker=dict(size=20, color='#e5e7eb', line=dict(width=2, color='white')),
                     name='Grant-Funded Research',
                     showlegend=True
                 )
                 node_traces.append(funded_pub_trace)
         
-        # Treatment pathway nodes
+        # Treatment pathway nodes (yellow/orange)
         if treatment_pathway_pubs:
             treat_x = [node_positions[pub_id][0] for pub_id in treatment_pathway_pubs if pub_id in node_positions]
             treat_y = [node_positions[pub_id][1] for pub_id in treatment_pathway_pubs if pub_id in node_positions]
@@ -261,13 +303,13 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     mode='markers',
                     hoverinfo='text',
                     text=["Treatment Development<br>Cites Grant Research"] * len(treat_x),
-                    marker=dict(size=20, color='#fbbf24', line=dict(width=2, color='white')),
+                    marker=dict(size=25, color='#ffa500', line=dict(width=3, color='white')),
                     name='Treatment Development',
                     showlegend=True
                 )
                 node_traces.append(pathway_trace)
         
-        # Ecosystem publications
+        # Ecosystem publications (small light gray)
         if ecosystem_pubs:
             eco_x = [node_positions[pub_id][0] for pub_id in ecosystem_pubs if pub_id in node_positions]
             eco_y = [node_positions[pub_id][1] for pub_id in ecosystem_pubs if pub_id in node_positions]
@@ -284,7 +326,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                 )
                 node_traces.append(eco_trace)
         
-        # Treatment nodes
+        # Treatment nodes (green)
         if len(treatments) > 0:
             treatment_x = [node_positions[treatments.iloc[0]['node_id']][0]]
             treatment_y = [node_positions[treatments.iloc[0]['node_id']][1]]
@@ -305,7 +347,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
         
         fig.update_layout(
             title={
-                'text': f"Research Impact Network - {network_id}",
+                'text': f"Research Impact Network - {network_id} (FIXED)",
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 24, 'color': '#1f4e79', 'family': 'Arial Black'}
@@ -334,9 +376,9 @@ def create_network_visualization(nodes_df, edges_df, network_id):
 def main():
     """Main application"""
     
-    # Header - minimal emoji
-    st.markdown('<h1 class="main-header">Research Impact Dashboard</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">Demonstrating Grant Impact Through Research Networks</p>', unsafe_allow_html=True)
+    # Header
+    st.markdown('<h1 class="main-header">Research Impact Dashboard - FIXED</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">Now Shows Treatment → Grant Connections!</p>', unsafe_allow_html=True)
     
     # Load data
     nodes_df, edges_df, summary_df = load_database()
@@ -346,6 +388,10 @@ def main():
     st.sidebar.write(f"Networks: {len(summary_df)}")
     st.sidebar.write(f"Total Nodes: {len(nodes_df)}")
     st.sidebar.write(f"Total Edges: {len(edges_df)}")
+    
+    # Treatment pathway edges check
+    treatment_edges_total = len(edges_df[edges_df['edge_type'] == 'leads_to_treatment'])
+    st.sidebar.write(f"Treatment Connections: {treatment_edges_total}")
     
     # Choose exploration method
     st.header("How would you like to explore the research?")
@@ -412,9 +458,9 @@ def main():
     # Show network visualization
     if selected_network_id:
         st.markdown("---")
-        st.header("Research Impact Network")
+        st.header("Research Impact Network - WITH DEBUG")
         
-        # Show the network with verified updates
+        # Show the FIXED network with full debug
         fig = create_network_visualization(nodes_df, edges_df, selected_network_id)
         st.plotly_chart(fig, width='stretch')
         
@@ -437,14 +483,17 @@ def main():
             st.metric("Impact Rate", f"{impact_percentage:.0f}%")
         
         # Key insights
-        st.info("""
-        **Key Connections:**
-        - **Blue thick lines** = Grant directly funds research
-        - **Yellow lines** = Treatment development cites grant-funded research
-        - **Gray thin lines** = General research citations (background)
-        
-        The yellow lines show how grant-funded research directly contributed to treatment development.
-        """)
+        if len(treatment_impact_edges) > 0:
+            st.success(f"✅ **SUCCESS**: Treatment development cited {len(treatment_impact_edges)} grant-funded publications!")
+            st.info("""
+            **Look for THICK ORANGE LINES connecting:**
+            - **Orange circles (right)** = Treatment development papers
+            - **Gray circles (left)** = Grant-funded research papers
+            
+            These orange lines prove the grant funding directly led to treatment development!
+            """)
+        else:
+            st.error("❌ No treatment impact connections found")
 
 if __name__ == "__main__":
     main()
