@@ -255,7 +255,7 @@ div[data-testid="stMetricValue"] {
 }
 
 div[data-testid="stMetricLabel"] {
-    color: #e2e8f0 !important; /* near-white labels */
+    color: #fafcff !important; /* near-white labels */
 }
 
 div[data-testid="stMetricDelta"] {
