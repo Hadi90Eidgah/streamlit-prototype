@@ -178,7 +178,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
     fig = go.Figure(data=[t for t in edge_traces + node_traces if t is not None])
 
     fig.update_layout(
-        title={'text': f"Citation Network - From Treatment to Grant {grant_id}", 'x': 0.5, 'xanchor': 'center', 'font': {'size': 20, 'color': '#e2e8f0', 'family': 'Inter, sans-serif'}},
+        title={'text': f"Citation Network - From Treatment to Grant {network_id}", 'x': 0.5, 'xanchor': 'center', 'font': {'size': 20, 'color': '#e2e8f0', 'family': 'Inter, sans-serif'}},
         showlegend=True,
         hovermode='closest',
         margin=dict(b=40, l=40, r=40, t=70),
