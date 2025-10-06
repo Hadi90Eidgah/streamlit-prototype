@@ -268,3 +268,25 @@ div[data-testid="stMetricLabel"] {
     font-size: 1rem !important;
     opacity: 1 !important; /* Streamlit sometimes dims these labels */
 }
+
+/* ==========================================
+   💡 FINAL FIX: Metric label color override
+   (Covers all Streamlit versions and nesting)
+   ========================================== */
+
+/* Primary Streamlit metric label */
+[data-testid="stMetric"] label,
+[data-testid="stMetric"] p,
+[data-testid="stMetric"] span,
+[data-testid="stMetricLabel"],
+div[data-testid="stMetric"] > div > div > label {
+    color: #e2e8f0 !important;   /* high-contrast light gray */
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    opacity: 1 !important;
+}
+
+/* Optional: Slightly brighten metric section titles */
+[data-testid="stMetric"] {
+    filter: brightness(1.1) !important;
+}
