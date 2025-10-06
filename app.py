@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import numpy as np
 import os
 from config import *
+import time
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -17,8 +18,28 @@ st.set_page_config(
 
 # --- Load External CSS ---
 def load_css(file_name):
+    """Load CSS and re-inject after render to override Streamlit theming."""
     with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+        css = f.read()
+
+    # Inject CSS once
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+    # Re-inject after render (ensures override on Streamlit Cloud)
+    st.markdown(
+        f"""
+        <script>
+            setTimeout(function() {{
+                var css = `{css}`;
+                var style = document.createElement('style');
+                style.innerHTML = css;
+                document.head.appendChild(style);
+                console.log('✅ Forced CSS reinjection {int(time.time())}');
+            }}, 1500);
+        </script>
+        """,
+        unsafe_allow_html=True
+    )   st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 load_css('style.css')
 
