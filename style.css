@@ -79,7 +79,7 @@ div[data-testid="metric-container"] {
 
 /* Metric value styling - THE BIG NUMBERS */
 div[data-testid="metric-container"] > div > div:first-child {
-    color: #ffffff !important;
+    color: #7de209 !important;
     font-weight: 600 !important;
     font-size: 2rem !important;
 }
