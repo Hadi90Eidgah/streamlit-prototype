@@ -86,7 +86,7 @@ div[data-testid="metric-container"] > div > div:first-child {
 
 /* Metric label styling - "Publications", "Research Duration" */
 div[data-testid="metric-container"] > div > div:nth-child(2) {
-    color: #90cdf4 !important;
+    color: #57ec1c !important;
     font-weight: 500 !important;
     font-size: 0.9rem !important;
 }
