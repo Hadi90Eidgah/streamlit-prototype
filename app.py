@@ -207,20 +207,13 @@ def display_network_metrics(summary_df, edges_df, network_id):
     """Display key metrics for the selected network"""
     try:
         network_summary = summary_df[summary_df['network_id'] == network_id].iloc[0]
-        network_edges = edges_df[edges_df['network_id'] == network_id]
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2 = st.columns(2)
         
         with col1:
             st.metric(label="Publications", value=f"{network_summary['total_publications']}", delta="Research papers")
         with col2:
             st.metric(label="Research Duration", value=f"{network_summary['research_duration']} years", delta=f"Approved {network_summary['approval_year']}")
-        with col3:
-            treatment_connections = len(network_edges[network_edges['edge_type'] == EDGE_TYPE_LEADS_TO_TREATMENT])
-            st.metric(label="Treatment Pathways", value=f"{treatment_connections}", delta="Impact connections")
-        with col4:
-            total_connections = len(network_edges)
-            st.metric(label="Total Connections", value=f"{total_connections}", delta="Network edges")
 
     except Exception as e:
         st.error(f"Error displaying metrics: {str(e)}")
