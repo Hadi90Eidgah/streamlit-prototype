@@ -118,11 +118,42 @@
     margin: 1rem 0; 
 }
 
-/* Selectbox styling */
+/* Complete Selectbox styling with text colors */
 .stSelectbox > div > div {
-    background-color: #2d3748;
-    border: 1px solid #4a5568;
-    border-radius: 6px;
+    background-color: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;  /* Selected value text color */
+}
+
+/* Dropdown input text */
+.stSelectbox div[data-baseweb="select"] > div {
+    color: #ffffff !important;  /* Input text color */
+}
+
+/* Dropdown arrow */
+.stSelectbox div[data-baseweb="select"] svg {
+    fill: #ffffff !important;  /* Arrow color */
+}
+
+/* Dropdown menu background */
+.stSelectbox div[role="listbox"] {
+    background-color: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+    border-radius: 6px !important;
+}
+
+/* Dropdown menu options */
+.stSelectbox div[role="listbox"] div {
+    color: #ffffff !important;  /* Dropdown options text color */
+    background-color: #2d3748 !important;
+    padding: 8px 12px !important;
+}
+
+/* Dropdown menu options on hover */
+.stSelectbox div[role="listbox"] div:hover {
+    color: #ffffff !important;  /* Hover text color */
+    background-color: #4299e1 !important;  /* Hover background color */
 }
 
 /* Info box styling */
