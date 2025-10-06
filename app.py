@@ -200,25 +200,16 @@ def create_network_visualization(nodes_df, edges_df, network_id):
         treatment_pathway_edges = network_edges[network_edges['edge_type'] == 'leads_to_treatment']
         citation_edges = network_edges[network_edges['edge_type'] == 'cites']
         
-        # Find complete pathways: Treatment → Ecosystem → Grant
-        complete_pathway_edges = []
+        # Find complete pathways: Treatment → Ecosystem → Grant (simplified approach)
+        complete_pathway_edge_ids = set()
         
         if len(treatment_pathway_edges) > 0:
-            # Get all treatment papers
-            treatment_papers = [n for n in network_nodes if n['node_id'].startswith('TREAT_PUB_')]
-            grant_papers = [n for n in network_nodes if n['node_id'].startswith('PUB_')]
-            
-            for treatment_paper in treatment_papers:
-                treatment_id = treatment_paper['node_id']
-                
-                # Find ecosystem papers this treatment cites
-                treatment_to_eco = treatment_pathway_edges[
-                    (treatment_pathway_edges['source_id'] == treatment_id) & 
-                    (treatment_pathway_edges['target_id'].str.startswith('ECO_'))
-                ]
-                
-                for _, t_to_e_edge in treatment_to_eco.iterrows():
-                    eco_id = t_to_e_edge['target_id']
+            # Find treatment papers that connect to ecosystem papers that connect to grant papers
+            for _, t_edge in treatment_pathway_edges.iterrows():
+                if (t_edge['source_id'].startswith('TREAT_PUB_') and 
+                    t_edge['target_id'].startswith('ECO_')):
+                    
+                    eco_id = t_edge['target_id']
                     
                     # Check if this ecosystem paper cites any grant papers
                     eco_to_grant = citation_edges[
@@ -227,36 +218,43 @@ def create_network_visualization(nodes_df, edges_df, network_id):
                     ]
                     
                     if len(eco_to_grant) > 0:
-                        # This is a complete pathway - highlight both edges
-                        complete_pathway_edges.append(t_to_e_edge)
-                        # Also add the ecosystem to grant edges
-                        for _, e_to_g_edge in eco_to_grant.iterrows():
-                            complete_pathway_edges.append(e_to_g_edge)
+                        # This is a complete pathway - mark both edges
+                        complete_pathway_edge_ids.add(f"{t_edge['source_id']}→{t_edge['target_id']}")
+                        
+                        for _, e_edge in eco_to_grant.iterrows():
+                            complete_pathway_edge_ids.add(f"{e_edge['source_id']}→{e_edge['target_id']}")
             
-            # Also include any direct treatment → grant connections (rare)
+            # Also include direct treatment → grant connections (rare)
             direct_treatment_to_grant = treatment_pathway_edges[
                 (treatment_pathway_edges['source_id'].str.startswith('TREAT_PUB_')) & 
                 (treatment_pathway_edges['target_id'].str.startswith('PUB_'))
             ]
             for _, edge in direct_treatment_to_grant.iterrows():
-                complete_pathway_edges.append(edge)
+                complete_pathway_edge_ids.add(f"{edge['source_id']}→{edge['target_id']}")
         
-        # Draw only the complete pathway edges in orange
-        if complete_pathway_edges:
+        # Draw complete pathway edges in orange
+        if complete_pathway_edge_ids:
             edge_x, edge_y = [], []
             
-            for edge in complete_pathway_edges:
-                # Handle both pandas Series and dict objects
-                if hasattr(edge, 'iloc'):  # pandas Series
-                    source_id = edge['source_id']
-                    target_id = edge['target_id']
-                else:  # dict
-                    source_id = edge['source_id']
-                    target_id = edge['target_id']
-                
-                if source_id in node_positions and target_id in node_positions:
-                    x0, y0 = node_positions[source_id]
-                    x1, y1 = node_positions[target_id]
+            # Draw treatment pathway edges that are part of complete pathways
+            for _, edge in treatment_pathway_edges.iterrows():
+                edge_id = f"{edge['source_id']}→{edge['target_id']}"
+                if (edge_id in complete_pathway_edge_ids and
+                    edge['source_id'] in node_positions and 
+                    edge['target_id'] in node_positions):
+                    x0, y0 = node_positions[edge['source_id']]
+                    x1, y1 = node_positions[edge['target_id']]
+                    edge_x.extend([x0, x1, None])
+                    edge_y.extend([y0, y1, None])
+            
+            # Draw citation edges that are part of complete pathways
+            for _, edge in citation_edges.iterrows():
+                edge_id = f"{edge['source_id']}→{edge['target_id']}"
+                if (edge_id in complete_pathway_edge_ids and
+                    edge['source_id'] in node_positions and 
+                    edge['target_id'] in node_positions):
+                    x0, y0 = node_positions[edge['source_id']]
+                    x1, y1 = node_positions[edge['target_id']]
                     edge_x.extend([x0, x1, None])
                     edge_y.extend([y0, y1, None])
             
@@ -275,19 +273,8 @@ def create_network_visualization(nodes_df, edges_df, network_id):
         all_citation_edges = network_edges[network_edges['edge_type'] == 'cites']
         remaining_treatment_edges = network_edges[network_edges['edge_type'] == 'leads_to_treatment']
         
-        # Create set of highlighted edge IDs to exclude
-        highlighted_edge_ids = set()
-        if complete_pathway_edges:
-            for edge in complete_pathway_edges:
-                # Handle both pandas Series and dict objects
-                if hasattr(edge, 'iloc'):  # pandas Series
-                    source_id = edge['source_id']
-                    target_id = edge['target_id']
-                else:  # dict
-                    source_id = edge['source_id']
-                    target_id = edge['target_id']
-                edge_id = f"{source_id}→{target_id}"
-                highlighted_edge_ids.add(edge_id)
+        # Use the complete_pathway_edge_ids set we already created
+        highlighted_edge_ids = complete_pathway_edge_ids
         
         # Draw remaining citation edges in gray
         if len(all_citation_edges) > 0:
