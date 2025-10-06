@@ -79,21 +79,21 @@ div[data-testid="metric-container"] {
 
 /* Metric value styling - THE BIG NUMBERS */
 div[data-testid="metric-container"] > div > div:first-child {
-    color: #7de209 !important;
+    color: #c6f6d5 !important; /* lighter mint for better readability */
     font-weight: 600 !important;
     font-size: 2rem !important;
 }
 
 /* Metric label styling - "Publications", "Research Duration" */
 div[data-testid="metric-container"] > div > div:nth-child(2) {
-    color: #57ec1c !important;
+    color: #e2e8f0 !important; /* soft white text for clear contrast */
     font-weight: 500 !important;
     font-size: 0.9rem !important;
 }
 
 /* Metric delta styling - "Research papers", "Approved 2024" */
 div[data-testid="metric-container"] > div > div:last-child {
-    color: #68d391 !important;
+    color: #81e6d9 !important; /* teal accent for subtle contrast */
     font-weight: 400 !important;
     font-size: 0.8rem !important;
 }
