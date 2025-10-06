@@ -224,9 +224,12 @@ def main():
     # Load data
     nodes_df, edges_df, summary_df = load_database()
 
-    if st.button("Reload Data", help="Refresh database if needed"):
-        st.cache_data.clear()
-        st.rerun()
+    # Refresh button with better styling
+    col1, col2, col3 = st.columns([1, 1, 8])
+    with col2:
+        if st.button("🔄 Refresh Data", help="Refresh database if needed", type="secondary"):
+            st.cache_data.clear()
+            st.rerun()
 
     st.sidebar.markdown("### Database Statistics")
     st.sidebar.write(f"Total connections: {len(edges_df)}")

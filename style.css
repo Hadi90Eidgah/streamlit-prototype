@@ -138,3 +138,26 @@
     border: 1px solid #48bb78;
     border-radius: 8px;
 }
+
+/* Refresh button styling */
+.refresh-button {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+/* Secondary button styling override */
+div[data-testid="stButton"] > button[kind="secondary"] {
+    background-color: rgba(45, 55, 72, 0.8) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #4a5568 !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+}
+
+div[data-testid="stButton"] > button[kind="secondary"]:hover {
+    background-color: rgba(66, 153, 225, 0.2) !important;
+    border-color: #63b3ed !important;
+    color: #ffffff !important;
+}
