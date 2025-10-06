@@ -124,6 +124,10 @@
     border: 1px solid #4a5568;
     border-radius: 6px;
 }
+.stSelectbox label {
+    color: #ff6b6b !important;  /* Red */
+    font-weight: bold !important;
+}
 
 /* Info box styling */
 .stInfo {
