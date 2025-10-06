@@ -55,7 +55,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data
+@st.cache_data(ttl=60)  # Cache for only 60 seconds to allow updates
 def load_database():
     """Load data from database or CSV files"""
     try:
@@ -463,7 +463,30 @@ def main():
     
     # Load data
     try:
+        # Add cache clear button for debugging
+        if st.button("🔄 Clear Cache & Reload Data", help="Force reload database if you see old data"):
+            st.cache_data.clear()
+            st.rerun()
+        
         nodes_df, edges_df, summary_df = load_database()
+        
+        # Debug info
+        st.sidebar.markdown("### 🔍 Database Info")
+        st.sidebar.write(f"Total edges: {len(edges_df)}")
+        st.sidebar.write(f"Treatment edges: {len(edges_df[edges_df['edge_type'] == 'leads_to_treatment'])}")
+        
+        # Show citation pattern breakdown
+        treatment_edges = edges_df[edges_df['edge_type'] == 'leads_to_treatment']
+        direct_to_grant = len(treatment_edges[
+            (treatment_edges['source_id'].str.startswith('TREAT_PUB_')) & 
+            (treatment_edges['target_id'].str.startswith('PUB_'))
+        ])
+        indirect_via_eco = len(treatment_edges[
+            (treatment_edges['source_id'].str.startswith('TREAT_PUB_')) & 
+            (treatment_edges['target_id'].str.startswith('ECO_'))
+        ])
+        st.sidebar.write(f"Direct treatment→grant: {direct_to_grant}")
+        st.sidebar.write(f"Indirect treatment→ecosystem: {indirect_via_eco}")
         
         if len(summary_df) == 0:
             st.error("No data available. Please check your database files.")
