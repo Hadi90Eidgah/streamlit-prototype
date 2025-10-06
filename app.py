@@ -149,7 +149,7 @@ def create_node_trace(nodes, node_positions, node_type, name, text_template, sho
         showlegend=showlegend
     )
 
-def create_network_visualization(nodes_df, edges_df, network_id):
+def create_network_visualization(nodes_df, edges_df, network_id, grant_id=None, treatment_name=None):
     """Create the network visualization."""
     network_nodes = nodes_df[nodes_df['network_id'] == network_id]
     network_edges = edges_df[edges_df['network_id'] == network_id]
@@ -157,6 +157,15 @@ def create_network_visualization(nodes_df, edges_df, network_id):
     if network_nodes.empty:
         st.error(f"No data found for network {network_id}")
         return go.Figure()
+
+    # Get grant ID and treatment name from the network data if not provided
+    if grant_id is None:
+        grant_node = network_nodes[network_nodes['node_type'] == NODE_TYPE_GRANT]
+        grant_id = grant_node.iloc[0]['node_id'] if not grant_node.empty else f"Network {network_id}"
+    
+    if treatment_name is None:
+        treatment_node = network_nodes[network_nodes['node_type'] == NODE_TYPE_TREATMENT]
+        treatment_name = treatment_node.iloc[0]['node_id'] if not treatment_node.empty else "Treatment"
 
     node_positions = get_node_positions(network_nodes, network_id)
 
@@ -178,7 +187,7 @@ def create_network_visualization(nodes_df, edges_df, network_id):
     fig = go.Figure(data=[t for t in edge_traces + node_traces if t is not None])
 
     fig.update_layout(
-        title={'text': f"Research Impact Network - Network {network_id}", 'x': 0.5, 'xanchor': 'center', 'font': {'size': 20, 'color': '#e2e8f0', 'family': 'Inter, sans-serif'}},
+        title={'text': f"Research Impact Network - {grant_id} → {treatment_name}", 'x': 0.5, 'xanchor': 'center', 'font': {'size': 20, 'color': '#e2e8f0', 'family': 'Inter, sans-serif'}},
         showlegend=True,
         hovermode='closest',
         margin=dict(b=40, l=40, r=40, t=70),
@@ -324,7 +333,9 @@ def main():
 
                 st.markdown("### 🕸️ Research Network Visualization")
                 with st.spinner("Creating network visualization..."):
-                    fig = create_network_visualization(nodes_df, edges_df, network_id)
+                    fig = create_network_visualization(nodes_df, edges_df, network_id, 
+                                                     grant_id=selected_summary['grant_id'], 
+                                                     treatment_name=selected_summary['treatment_name'])
                     if fig.data:
                         st.plotly_chart(fig, use_container_width=True)
                     else:
