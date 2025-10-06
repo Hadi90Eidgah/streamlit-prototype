@@ -39,7 +39,7 @@ NODE_SIZES = {
 # --- Edge Colors ---
 EDGE_COLORS = {
     'funded_by': 'rgba(74, 85, 104, 0.7)',           # Subtle blue-gray
-    'leads_to_treatment': 'rgba(99, 179, 237, 0.9)', # Bright blue (impact path)
+    'leads_to_treatment': 'rgba(160, 174, 192, 0.25)', # Bright blue (impact path)
     'cites': 'rgba(160, 174, 192, 0.25)',            # Light gray for citations
     'enables_treatment': 'rgba(56, 178, 172, 0.8)'   # Teal-green to treatment
 }
