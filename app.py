@@ -309,7 +309,12 @@ def create_network_visualization(nodes_df, edges_df, network_id, grant_id=None, 
         font=dict(color='#e2e8f0'),
         legend=dict( orientation="v",yanchor="top",y=-0.15, xanchor="center", x=0.5, bgcolor="rgba(45, 55, 72, 0.9)", bordercolor="rgba(74, 85, 104, 0.5)", borderwidth=1, font=dict(size=11, color='#e2e8f0'))
     )
-
+    
+    fig.update_layout(
+    template=None,
+    paper_bgcolor='rgba(14, 17, 23, 1)',  # solid dark
+    plot_bgcolor='rgba(14, 17, 23, 1)'    # solid dark
+    )
     return fig
 
 # --- UI Components ---
