@@ -448,6 +448,37 @@ def main():
                         st.plotly_chart(fig, use_container_width=True)
                     else:
                         st.error("Unable to create network visualization")
+                # --- Citation Explorer Section ---
+                st.markdown("### 🔍 Explore Direct Citations Between Publications")
+                
+                # Get the network’s ecosystem and treatment-pathway papers
+                network_nodes = nodes_df[nodes_df['network_id'] == network_id]
+                network_edges = edges_df[edges_df['network_id'] == network_id]
+                
+                # Identify direct citation edges (ecosystem or treatment papers citing funded ones)
+                direct_citations = network_edges[
+                    (network_edges['edge_type'] == EDGE_TYPE_CITES) &
+                    (network_edges['target_id'].str.startswith('PUB_')) &
+                    (network_edges['source_id'].str.startswith(('ECO_', 'TREAT_PUB_')))
+                ]
+                
+                if not direct_citations.empty:
+                    st.write(f"Found **{len(direct_citations)}** ecosystem or treatment papers that directly cited grant-funded papers.")
+                
+                    # Create a sliding window container for each citing paper
+                    for _, edge in direct_citations.iterrows():
+                        citing_paper = network_nodes[network_nodes['node_id'] == edge['source_id']].iloc[0]
+                        cited_paper = network_nodes[network_nodes['node_id'] == edge['target_id']].iloc[0]
+                
+                        with st.expander(f"📄 {citing_paper.get('title', 'Untitled')} ({int(citing_paper['year']) if pd.notna(citing_paper.get('year')) else 'N/A'})"):
+                            st.markdown(f"**Journal:** {citing_paper.get('journal', 'N/A')}")
+                            st.markdown(f"**Authors:** {citing_paper.get('authors', 'N/A')}")
+                            st.markdown(f"**PubMed ID:** {int(citing_paper['pmid']) if pd.notna(citing_paper.get('pmid')) else 'N/A'}")
+                            st.markdown("---")
+                            st.markdown(f"🧩 **Cites grant-funded paper:** {cited_paper.get('title', 'N/A')} ({int(cited_paper['year']) if pd.notna(cited_paper.get('year')) else 'N/A'})")
+                else:
+                    st.info("No direct ecosystem or treatment citations to grant-funded papers found in this network.")
+
             else:
                 # Selected network is not in current filter, clear selection
                 st.session_state.selected_network = None
