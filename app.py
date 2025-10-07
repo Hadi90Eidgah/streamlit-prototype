@@ -121,11 +121,39 @@ def get_node_positions(network_nodes, network_id):
     for i, pub_id in enumerate(treatment_pathway_pubs):
         node_positions[pub_id] = (NODE_POSITIONS_X['treatment_pathway_pub'], NODE_POSITIONS_Y['treatment_pathway_pub'][i % len(NODE_POSITIONS_Y['treatment_pathway_pub'])])
 
-    for i, pub_id in enumerate(ecosystem_pubs):
-        cluster_idx = i % len(NODE_POSITIONS_X['ecosystem_pub_cluster'])
-        center_x = NODE_POSITIONS_X['ecosystem_pub_cluster'][cluster_idx]
-        center_y = NODE_POSITIONS_Y['ecosystem_pub_cluster'][cluster_idx]
-        node_positions[pub_id] = (center_x + np.random.normal(0, 0.4), center_y + np.random.normal(0, 0.4))
+    # --- Ecosystem publications positioned by year ---
+    ecosystem_pubs_df = publications[publications['node_id'].str.startswith('ECO_')]
+
+    if not ecosystem_pubs_df.empty:
+        min_year = ecosystem_pubs_df['year'].min()
+        max_year = ecosystem_pubs_df['year'].max()
+
+        for _, node in ecosystem_pubs_df.iterrows():
+            year = node.get('year', np.nan)
+
+            if pd.notna(year):
+                # Map publication year to horizontal position between grant and treatment areas
+                x_pos = np.interp(
+                    year,
+                    [min_year, max_year],
+                    [NODE_POSITIONS_X['grant_funded_pub'] + 0.5,
+                     NODE_POSITIONS_X['treatment_pathway_pub'] - 0.5]
+                )
+            else:
+                # Fallback for missing year
+                x_pos = np.random.uniform(
+                    NODE_POSITIONS_X['grant_funded_pub'] + 0.5,
+                    NODE_POSITIONS_X['treatment_pathway_pub'] - 0.5
+                )
+
+            # Add small vertical jitter for natural dispersion
+            y_pos = np.random.uniform(-1.5, 1.5)
+
+            node_positions[node['node_id']] = (
+                x_pos + np.random.normal(0, 0.2),
+                y_pos + np.random.normal(0, 0.2)
+            )
+
 
     # Position treatment
     treatments = network_nodes[network_nodes['node_type'] == NODE_TYPE_TREATMENT]
