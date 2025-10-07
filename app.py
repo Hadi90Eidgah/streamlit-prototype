@@ -192,6 +192,7 @@ def create_node_trace(nodes, node_positions, node_type, name, text_template, sho
             hover_text = (
                 f"<b>Research Ecosystem</b><br>"
                 f"<b>Title:</b> {node.get('title', 'N/A')}<br>"
+                f"<b>Year:</b> {int(node['year']) if pd.notna(node.get('year')) else 'N/A'}<br>"
                 f"<b>Journal:</b> {node.get('journal', 'N/A')}<br>"
                 f"<b>Authors:</b> {node.get('authors', 'N/A')}"
             )
