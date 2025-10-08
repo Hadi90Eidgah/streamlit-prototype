@@ -323,12 +323,16 @@ def display_network_metrics(summary_df, edges_df, network_id):
     try:
         network_summary = summary_df[summary_df['network_id'] == network_id].iloc[0]
         
-        col1, col2 = st.columns(2)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             st.metric(label="Publications", value=f"{network_summary['total_publications']}", delta="Research papers")
         with col2:
             st.metric(label="Research Duration", value=f"{network_summary['research_duration']} years", delta=f"Approved {network_summary['approval_year']}")
+        with col3:
+            st.metric(label= "Grant Number", value = 4)
+        with col4:
+            st.metric(label = "Funded Amount", Value = 1300000 )
 
     except Exception as e:
         st.error(f"Error displaying metrics: {str(e)}")
