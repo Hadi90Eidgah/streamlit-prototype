@@ -332,7 +332,7 @@ def display_network_metrics(summary_df, edges_df, network_id):
         with col3:
             st.metric(label= "Grant Number", value = 4)
         with col4:
-            st.metric(label = "Funded Amount", Value = 1300000 )
+            st.metric(label = "Funded Amount", value = 1300000 )
 
     except Exception as e:
         st.error(f"Error displaying metrics: {str(e)}")
